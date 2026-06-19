@@ -291,9 +291,9 @@ export default function SweepstakeDashboard() {
           </div>
         </div>
 
-        {/* Scrollable tabs with fade hint */}
+        {/* Scrollable tabs with visible scroll hint */}
         <div style={{ position: "relative", marginBottom: 16 }}>
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4, scrollbarWidth: "none" }}>
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4, scrollbarWidth: "none", paddingRight: 40 }}>
             <div style={{ display: "flex", gap: 8, minWidth: "max-content" }}>
               {tabs.map(t => (
                 <button key={t.id} onClick={() => setView(t.id)} style={{
@@ -307,8 +307,12 @@ export default function SweepstakeDashboard() {
               ))}
             </div>
           </div>
-          {/* Fade hint — signals more tabs to the right */}
-          <div style={{ position: "absolute", right: 0, top: 0, bottom: 4, width: 48, background: `linear-gradient(to right, transparent, ${NAVY})`, pointerEvents: "none", borderRadius: "0 10px 10px 0" }} />
+          {/* Visible swipe hint */}
+          <div style={{ position: "absolute", right: 0, top: 0, bottom: 4, width: 44, display: "flex", alignItems: "center", justifyContent: "center", background: `linear-gradient(to right, transparent, ${NAVY} 50%)`, pointerEvents: "none" }}>
+            <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, width: 28, height: 32, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 10px rgba(0,0,0,0.4)" }}>
+              <span style={{ color: "#fff", fontSize: 16, fontWeight: 700, lineHeight: 1 }}>›</span>
+            </div>
+          </div>
         </div>
 
         {/* Tab content with fade animation */}
