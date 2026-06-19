@@ -291,20 +291,24 @@ export default function SweepstakeDashboard() {
           </div>
         </div>
 
-        {/* Scrollable tabs */}
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", marginBottom: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
-          <div style={{ display: "flex", gap: 8, minWidth: "max-content" }}>
-            {tabs.map(t => (
-              <button key={t.id} onClick={() => setView(t.id)} style={{
-                padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase",
-                background: view === t.id ? GREEN : "rgba(255,255,255,0.07)",
-                color: view === t.id ? NAVY : INK_SUB,
-                transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
-                boxShadow: view === t.id ? `0 0 16px ${GREEN}66` : "none",
-              }}>{t.label}</button>
-            ))}
+        {/* Scrollable tabs with fade hint */}
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4, scrollbarWidth: "none" }}>
+            <div style={{ display: "flex", gap: 8, minWidth: "max-content" }}>
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setView(t.id)} style={{
+                  padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer",
+                  fontSize: 13, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase",
+                  background: view === t.id ? GREEN : "rgba(255,255,255,0.07)",
+                  color: view === t.id ? NAVY : INK_SUB,
+                  transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
+                  boxShadow: view === t.id ? `0 0 16px ${GREEN}66` : "none",
+                }}>{t.label}</button>
+              ))}
+            </div>
           </div>
+          {/* Fade hint — signals more tabs to the right */}
+          <div style={{ position: "absolute", right: 0, top: 0, bottom: 4, width: 48, background: `linear-gradient(to right, transparent, ${NAVY})`, pointerEvents: "none", borderRadius: "0 10px 10px 0" }} />
         </div>
 
         {/* Tab content with fade animation */}
