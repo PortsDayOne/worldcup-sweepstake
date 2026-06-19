@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 import { PLAYERS, PROGRESSION, RECENT, LAST_UPDATED } from "./data.js";
 import { GROUPS, OWNERS, PLAYER_COLORS } from "./groups.js";
@@ -8,6 +8,41 @@ const NAVY2 = "#16243F";
 const GOLD = "#F0C446";
 const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
+
+// Compute form by comparing last two progression rows
+function getForm(playerName) {
+  if (PROGRESSION.length < 2) return "same";
+  const prev = PROGRESSION[PROGRESSION.length - 2][playerName] ?? 0;
+  const curr = PROGRESSION[PROGRESSION.length - 1][playerName] ?? 0;
+  if (curr > prev) return "up";
+  if (curr < prev) return "down";
+  return "same";
+}
+
+function FormArrow({ name }) {
+  const form = getForm(name);
+  if (form === "up")   return <span style={{ color: "#40C6A0", fontSize: 16, fontWeight: 800, marginLeft: 4 }}>↑</span>;
+  if (form === "down") return <span style={{ color: "#E0556E", fontSize: 16, fontWeight: 800, marginLeft: 4 }}>↓</span>;
+  return <span style={{ color: INK_SUB, fontSize: 16, marginLeft: 4 }}>→</span>;
+}
+
+// Animated trophy for leader
+function Trophy() {
+  const [glow, setGlow] = useState(false);
+  useEffect(() => {
+    const t = setInterval(() => setGlow(g => !g), 1200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span style={{
+      fontSize: 28,
+      filter: glow ? "drop-shadow(0 0 8px #F0C446) drop-shadow(0 0 16px #F0C446)" : "drop-shadow(0 0 2px #F0C44688)",
+      transition: "filter 1.2s ease-in-out",
+      marginRight: 6,
+      display: "inline-block",
+    }}>🏆</span>
+  );
+}
 
 const RankTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -46,7 +81,6 @@ function GroupCard({ group }) {
   return (
     <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "14px 16px", marginBottom: 12 }}>
       <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 10px" }}>{group.name}</p>
-      {/* Header row */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 28px 28px 28px 28px 32px", gap: 4, marginBottom: 6 }}>
         <span style={{ color: INK_SUB, fontSize: 10, letterSpacing: 1 }}>TEAM</span>
         {["GP","W","D","L","PTS"].map(h => (
@@ -109,7 +143,9 @@ export default function SweepstakeDashboard() {
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ color: GREEN, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 2px" }}>Leader</p>
-            <p style={{ color: "#fff", fontSize: 22, fontWeight: 900, margin: 0 }}>{leader.name}</p>
+            <p style={{ color: "#fff", fontSize: 22, fontWeight: 900, margin: 0 }}>
+              <Trophy />{leader.name}
+            </p>
             <p style={{ color: GOLD, fontSize: 15, fontWeight: 700, margin: 0 }}>{leader.total} pts</p>
           </div>
         </div>
@@ -167,14 +203,16 @@ export default function SweepstakeDashboard() {
                   <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: medal || "rgba(255,255,255,0.08)", color: medal ? NAVY : INK_SUB, fontWeight: 800, fontSize: 13, marginTop: 2 }}>{i + 1}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ color: "#fff", fontSize: 15, fontWeight: 700, margin: "0 0 3px" }}>{p.name}</p>
-                    {/* FIXED: no truncation — wraps naturally on mobile */}
                     <p style={{ color: INK_SUB, fontSize: 11.5, margin: 0, lineHeight: 1.6, whiteSpace: "normal", wordBreak: "break-word" }}>{p.teams}</p>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
                     <div style={{ width: 40, height: 40, borderRadius: 10, background: NAVY, display: "flex", alignItems: "center", justifyContent: "center", border: `1.5px solid ${p.color}` }}>
                       <span style={{ color: "#fff", fontSize: 16, fontWeight: 800 }}>{p.total}</span>
                     </div>
-                    <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 0.5 }}>PL {p.played}</span>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 0.5 }}>PL {p.played}</span>
+                      <FormArrow name={p.name} />
+                    </div>
                   </div>
                 </div>
               );
