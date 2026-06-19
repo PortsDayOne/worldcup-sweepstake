@@ -291,9 +291,9 @@ export default function SweepstakeDashboard() {
           </div>
         </div>
 
-        {/* Scrollable tabs with visible scroll hint */}
-        <div style={{ position: "relative", marginBottom: 16 }}>
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4, scrollbarWidth: "none", paddingRight: 40 }}>
+        {/* Scrollable tabs with visible scroll hint below */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4, scrollbarWidth: "none" }}>
             <div style={{ display: "flex", gap: 8, minWidth: "max-content" }}>
               {tabs.map(t => (
                 <button key={t.id} onClick={() => setView(t.id)} style={{
@@ -307,11 +307,12 @@ export default function SweepstakeDashboard() {
               ))}
             </div>
           </div>
-          {/* Visible swipe hint */}
-          <div style={{ position: "absolute", right: 0, top: 0, bottom: 4, width: 44, display: "flex", alignItems: "center", justifyContent: "center", background: `linear-gradient(to right, transparent, ${NAVY} 50%)`, pointerEvents: "none" }}>
-            <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, width: 28, height: 32, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 10px rgba(0,0,0,0.4)" }}>
-              <span style={{ color: "#fff", fontSize: 16, fontWeight: 700, lineHeight: 1 }}>›</span>
-            </div>
+          {/* Swipe hint row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, opacity: 0.6 }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+            <span style={{ color: INK_SUB, fontSize: 10, letterSpacing: 1, textTransform: "uppercase" }}>swipe for more tabs</span>
+            <span style={{ color: GREEN, fontSize: 13, fontWeight: 700 }}>›</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
           </div>
         </div>
 
