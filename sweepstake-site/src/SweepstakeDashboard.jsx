@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 import { PLAYERS, PROGRESSION, RECENT, LAST_UPDATED } from "./data.js";
 import { GROUPS, OWNERS, PLAYER_COLORS } from "./groups.js";
@@ -24,68 +24,84 @@ function getForm(name) {
   if (PROGRESSION.length < 2) return "same";
   const prev = PROGRESSION[PROGRESSION.length - 2][name] ?? 0;
   const curr = PROGRESSION[PROGRESSION.length - 1][name] ?? 0;
-  if (curr > prev) return "up";
-  if (curr < prev) return "down";
-  return "same";
+  return curr > prev ? "up" : curr < prev ? "down" : "same";
 }
 
+// All arrows same size, same glow — just different colours
 function FormArrow({ name, size = 15 }) {
   const form = getForm(name);
-  const base = {
-    fontSize: size, fontWeight: 800, marginLeft: 3,
-    display: "inline-block", lineHeight: 1,
-  };
-  if (form === "up") return (
+  const colors = { up: "#40C6A0", down: "#E0556E", same: "#8694AC" };
+  const symbols = { up: "↑", down: "↓", same: "→" };
+  const col = colors[form];
+  return (
     <span style={{
-      ...base, color: GREEN,
-      textShadow: "0 0 6px #40C6A0, 0 0 12px #40C6A0",
-      animation: "none",
-    }}>↑</span>
+      fontSize: size, fontWeight: 800, marginLeft: 3,
+      display: "inline-block", lineHeight: 1, color: col,
+      textShadow: `0 0 6px ${col}, 0 0 12px ${col}88`,
+    }}>{symbols[form]}</span>
   );
-  if (form === "down") return <span style={{ ...base, color: "#E0556E" }}>↓</span>;
-  return <span style={{ ...base, color: INK_SUB }}>→</span>;
 }
 
 function Trophy() {
   const [glow, setGlow] = useState(false);
   useEffect(() => { const t = setInterval(() => setGlow(g => !g), 1200); return () => clearInterval(t); }, []);
-  return <span style={{ fontSize: 24, filter: glow ? "drop-shadow(0 0 8px #F0C446) drop-shadow(0 0 16px #F0C446)" : "drop-shadow(0 0 2px #F0C44688)", transition: "filter 1.2s ease-in-out", marginRight: 4 }}>🏆</span>;
+  return <span style={{ fontSize: 24, filter: glow ? "drop-shadow(0 0 10px #F0C446) drop-shadow(0 0 20px #F0C446)" : "drop-shadow(0 0 3px #F0C44688)", transition: "filter 1.2s ease-in-out", marginRight: 4 }}>🏆</span>;
 }
 
 function OwnerBadge({ team }) {
   const owner = OWNERS[team];
   if (!owner) return null;
+  const col = PLAYER_COLORS[owner] || "#666";
   return (
-    <span style={{
-      background: PLAYER_COLORS[owner] || "#666", color: NAVY,
-      fontSize: 8, fontWeight: 800, padding: "1px 4px", borderRadius: 3,
-      flexShrink: 0, letterSpacing: 0.3, whiteSpace: "nowrap",
-    }}>{owner.toUpperCase()}</span>
+    <span style={{ background: col, color: NAVY, fontSize: 8, fontWeight: 800, padding: "1px 5px", borderRadius: 3, flexShrink: 0, letterSpacing: 0.3, whiteSpace: "nowrap" }}>
+      {owner.toUpperCase()}
+    </span>
   );
 }
 
-// Compute how many teams per player are currently in top-2 of their group
+// Glowing points badge
+function PtsBadge({ value, color }) {
+  return (
+    <div style={{
+      width: 44, height: 44, borderRadius: 12, background: NAVY,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      border: `1.5px solid ${color}`,
+      boxShadow: `0 0 8px ${color}55, 0 0 16px ${color}22`,
+    }}>
+      <span style={{ color: "#fff", fontSize: 17, fontWeight: 800 }}>{value}</span>
+    </div>
+  );
+}
+
 function getQualifyingCounts() {
   const counts = {};
-  PLAYERS.forEach(p => counts[p.name] = { q: 0, total: 0 });
+  PLAYERS.forEach(p => { counts[p.name] = { q: 0, total: 0 }; });
   GROUPS.forEach(g => {
     const sorted = [...g.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
     sorted.forEach((t, i) => {
       const owner = OWNERS[t.name];
-      if (owner && counts[owner]) {
-        counts[owner].total++;
-        if (i < 2) counts[owner].q++;
-      }
+      if (owner && counts[owner]) { counts[owner].total++; if (i < 2) counts[owner].q++; }
     });
   });
   return counts;
+}
+
+// Animated tab panel wrapper
+function TabPanel({ children }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { requestAnimationFrame(() => setVisible(true)); return () => setVisible(false); }, []);
+  return (
+    <div style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(8px)", transition: "opacity 0.25s ease, transform 0.25s ease" }}>
+      {children}
+    </div>
+  );
 }
 
 const RankTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div style={{ background: NAVY2, border: `1px solid ${p.color}`, borderRadius: 12, padding: "12px 16px", maxWidth: 280 }}>
+    <div style={{ background: NAVY2, border: `1px solid ${p.color}`, borderRadius: 12, padding: "12px 16px", maxWidth: 280, boxShadow: `0 0 16px ${p.color}44` }}>
       <p style={{ color: p.color, fontSize: 16, fontWeight: 800, margin: "0 0 2px" }}>{p.name} · {p.total} pts</p>
       <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 6px" }}>{p.played} games played</p>
       <p style={{ color: "#C5D0E0", fontSize: 12, margin: 0, lineHeight: 1.6 }}>{p.teams}</p>
@@ -97,7 +113,7 @@ const LineTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const sorted = [...payload].sort((a, b) => b.value - a.value);
   return (
-    <div style={{ background: NAVY2, border: `1px solid ${GREEN}`, borderRadius: 12, padding: "12px 16px" }}>
+    <div style={{ background: NAVY2, border: `1px solid ${GREEN}`, borderRadius: 12, padding: "12px 16px", boxShadow: `0 0 16px ${GREEN}33` }}>
       <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 8px" }}>{label}</p>
       {sorted.map(e => (
         <div key={e.dataKey} style={{ display: "flex", justifyContent: "space-between", gap: 18, margin: "2px 0" }}>
@@ -112,27 +128,25 @@ const LineTooltip = ({ active, payload, label }) => {
 function GroupCard({ group }) {
   const sorted = [...group.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
   return (
-    <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "10px 12px" }}>
-      <p style={{ color: GREEN, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>{group.name}</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 22px 22px 22px 22px 26px", gap: 2, marginBottom: 4 }}>
-        <span style={{ color: INK_SUB, fontSize: 9 }}>TEAM</span>
-        {["GP","W","D","L","PTS"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, textAlign: "center" }}>{h}</span>)}
+    <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "12px 16px", marginBottom: 10 }}>
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 10px", textShadow: `0 0 8px ${GREEN}88` }}>{group.name}</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 30px 28px 28px 28px 32px", gap: 4, marginBottom: 6 }}>
+        <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 1 }}>TEAM</span>
+        {["GP","W","D","L","PTS"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, textAlign: "center", letterSpacing: 1 }}>{h}</span>)}
       </div>
       {sorted.map((t, i) => {
         const isTop2 = i < 2;
         return (
           <div key={t.name}>
-            {i === 2 && (
-              <div style={{ borderTop: "1px dashed rgba(255,255,255,0.2)", margin: "4px 0" }} />
-            )}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 22px 22px 22px 22px 26px", gap: 2, alignItems: "center", padding: "4px 0", opacity: isTop2 ? 1 : 0.55 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, minWidth: 0, overflow: "hidden" }}>
-                {isTop2 && <div style={{ width: 2, height: 12, borderRadius: 1, background: GREEN, flexShrink: 0 }} />}
-                <span style={{ color: "#fff", fontSize: 11, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0, flexShrink: 1 }}>{t.name}</span>
+            {i === 2 && <div style={{ borderTop: "1px dashed rgba(255,255,255,0.25)", margin: "5px 0" }} />}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 30px 28px 28px 28px 32px", gap: 4, alignItems: "center", padding: "5px 0", borderBottom: i < sorted.length - 1 && i !== 1 ? "1px solid rgba(255,255,255,0.04)" : "none", opacity: isTop2 ? 1 : 0.55 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                {isTop2 && <div style={{ width: 3, height: 14, borderRadius: 2, background: GREEN, flexShrink: 0, boxShadow: `0 0 6px ${GREEN}` }} />}
+                <span style={{ color: "#fff", fontSize: 13, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
                 <OwnerBadge team={t.name} />
               </div>
-              {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 10, textAlign: "center" }}>{v}</span>)}
-              <span style={{ color: isTop2 ? "#fff" : INK_SUB, fontSize: 11, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
+              {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 12, textAlign: "center" }}>{v}</span>)}
+              <span style={{ color: isTop2 ? "#fff" : INK_SUB, fontSize: 13, fontWeight: 800, textAlign: "center", textShadow: isTop2 ? "0 0 8px rgba(255,255,255,0.4)" : "none" }}>{t.pts}</span>
             </div>
           </div>
         );
@@ -147,64 +161,57 @@ function TopTeams() {
     return sorted.map((t, i) => ({ ...t, gd: t.gf - t.ga, qualifying: i < 2 }));
   });
   const sorted = [...all].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-
-  // Find where qualifying line is (first non-qualifying team after top section)
-  let splitIdx = sorted.findIndex(t => !t.qualifying);
-
-  // Player knockout summary
+  const splitIdx = sorted.findIndex(t => !t.qualifying);
   const qCounts = getQualifyingCounts();
   const playerSummary = [...PLAYERS].sort((a, b) => b.total - a.total);
 
   return (
     <div>
-      {/* Player knockout summary */}
-      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Player Knockout Summary</p>
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px", textShadow: `0 0 8px ${GREEN}88` }}>Player Knockout Summary</p>
       <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "10px 14px", marginBottom: 16 }}>
         {playerSummary.map((p, i) => {
-          const q = qCounts[p.name] || { q: 0, total: 0 };
+          const q = qCounts[p.name] || { q: 0, total: 6 };
           return (
-            <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: i < playerSummary.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
+            <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < playerSummary.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, flexShrink: 0, boxShadow: `0 0 6px ${p.color}` }} />
               <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, flex: 1 }}>{p.name}</span>
-              <span style={{ color: INK_SUB, fontSize: 12 }}>{q.q}/{q.total} teams qualifying</span>
+              <span style={{ color: INK_SUB, fontSize: 11, minWidth: 80, textAlign: "right" }}>{q.q}/{q.total} qualifying</span>
               <div style={{ display: "flex", gap: 3 }}>
                 {Array.from({ length: q.total }).map((_, j) => (
-                  <div key={j} style={{ width: 10, height: 10, borderRadius: 2, background: j < q.q ? p.color : "rgba(255,255,255,0.15)" }} />
+                  <div key={j} style={{ width: 10, height: 10, borderRadius: 2, background: j < q.q ? p.color : "rgba(255,255,255,0.15)", boxShadow: j < q.q ? `0 0 4px ${p.color}` : "none" }} />
                 ))}
               </div>
-              <FormArrow name={p.name} size={14} />
+              <FormArrow name={p.name} size={15} />
             </div>
           );
         })}
       </div>
 
-      {/* Full team rankings */}
-      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>All {sorted.length} Teams Ranked</p>
-      <p style={{ color: INK_SUB, fontSize: 11, margin: "0 0 10px" }}>Ranked by points then goal difference. Dotted line shows current qualification cut-off.</p>
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 6px", textShadow: `0 0 8px ${GREEN}88` }}>All {sorted.length} Teams Ranked</p>
+      <p style={{ color: INK_SUB, fontSize: 11, margin: "0 0 10px" }}>Points then goal difference. Dotted line = current elimination cut-off.</p>
       <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 30px 30px 28px", gap: 4, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          {["#", "TEAM", "PTS", "GD", "GF"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, fontWeight: 700, letterSpacing: 1, textAlign: h === "TEAM" ? "left" : "center" }}>{h}</span>)}
+        <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 28px", gap: 4, padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          {["#","TEAM","PTS","GD","GF"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, fontWeight: 700, letterSpacing: 1, textAlign: h === "TEAM" ? "left" : "center" }}>{h}</span>)}
         </div>
         {sorted.map((t, i) => {
           const medal = i === 0 ? GOLD : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : null;
-          const showDivider = i === splitIdx;
           return (
             <div key={t.name + i}>
-              {showDivider && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", background: "rgba(255,255,255,0.03)" }}>
+              {i === splitIdx && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 14px", background: "rgba(255,255,255,0.03)" }}>
                   <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
                   <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap" }}>Elimination zone</span>
                   <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
                 </div>
               )}
-              <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 30px 30px 28px", gap: 4, padding: "8px 12px", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent", opacity: t.qualifying ? 1 : 0.6 }}>
-                <span style={{ color: medal || INK_SUB, fontSize: 11, fontWeight: medal ? 800 : 400, textAlign: "center" }}>{i + 1}</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, minWidth: 0 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 28px", gap: 4, padding: "8px 14px", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent", opacity: t.qualifying ? 1 : 0.55 }}>
+                <span style={{ color: medal || INK_SUB, fontSize: 11, fontWeight: medal ? 800 : 400, textAlign: "center", textShadow: medal ? `0 0 8px ${medal}` : "none" }}>{i + 1}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
                   <span style={{ color: "#fff", fontSize: 12, fontWeight: t.qualifying ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
                   <OwnerBadge team={t.name} />
                 </div>
-                <span style={{ color: "#fff", fontSize: 12, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
-                <span style={{ color: t.gd > 0 ? GREEN : t.gd < 0 ? "#E0556E" : INK_SUB, fontSize: 11, fontWeight: 600, textAlign: "center" }}>{t.gd > 0 ? `+${t.gd}` : t.gd}</span>
+                <span style={{ color: "#fff", fontSize: 12, fontWeight: 800, textAlign: "center", textShadow: "0 0 8px rgba(255,255,255,0.3)" }}>{t.pts}</span>
+                <span style={{ color: t.gd > 0 ? GREEN : t.gd < 0 ? "#E0556E" : INK_SUB, fontSize: 11, fontWeight: 600, textAlign: "center", textShadow: t.gd !== 0 ? `0 0 6px ${t.gd > 0 ? GREEN : "#E0556E"}88` : "none" }}>{t.gd > 0 ? `+${t.gd}` : t.gd}</span>
                 <span style={{ color: INK_SUB, fontSize: 11, textAlign: "center" }}>{t.gf}</span>
               </div>
             </div>
@@ -219,28 +226,28 @@ function FixturesTab() {
   const byDate = FIXTURES.reduce((acc, f) => { if (!acc[f.date]) acc[f.date] = []; acc[f.date].push(f); return acc; }, {});
   return (
     <div>
-      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>All times in UK (BST). Coloured tags show your sweepstake players' teams.</p>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>All times UK (BST). Highlighted rows = your sweepstake teams playing.</p>
       {Object.entries(byDate).map(([date, games]) => (
         <div key={date} style={{ marginBottom: 16 }}>
-          <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>{date}</p>
+          <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px", textShadow: `0 0 8px ${GREEN}88` }}>{date}</p>
           {games.map((g, i) => {
             const homeOwner = OWNERS[g.home];
             const awayOwner = OWNERS[g.away];
             const hasOwner = homeOwner || awayOwner;
             return (
-              <div key={i} style={{ background: hasOwner ? "rgba(255,255,255,0.06)" : NAVY2, border: `1px solid ${hasOwner ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "11px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flexShrink: 0, minWidth: 58 }}>
-                  <p style={{ color: GOLD, fontSize: 12, fontWeight: 700, margin: 0 }}>{g.time}</p>
+              <div key={i} style={{ background: hasOwner ? "rgba(64,198,160,0.07)" : NAVY2, border: `1px solid ${hasOwner ? "rgba(64,198,160,0.25)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "11px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, boxShadow: hasOwner ? `0 0 12px rgba(64,198,160,0.08)` : "none" }}>
+                <div style={{ flexShrink: 0, minWidth: 60 }}>
+                  <p style={{ color: GOLD, fontSize: 12, fontWeight: 700, margin: 0, textShadow: `0 0 8px ${GOLD}88` }}>{g.time}</p>
                   <p style={{ color: INK_SUB, fontSize: 10, margin: 0 }}>Grp {g.group}</p>
                 </div>
-                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ color: "#fff", fontSize: 13, fontWeight: homeOwner ? 700 : 400 }}>{g.home}</span>
+                    <span style={{ color: homeOwner ? "#fff" : INK_SUB, fontSize: 13, fontWeight: homeOwner ? 700 : 400 }}>{g.home}</span>
                     {homeOwner && <OwnerBadge team={g.home} />}
                   </div>
                   <span style={{ color: INK_SUB, fontSize: 11 }}>vs</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ color: "#fff", fontSize: 13, fontWeight: awayOwner ? 700 : 400 }}>{g.away}</span>
+                    <span style={{ color: awayOwner ? "#fff" : INK_SUB, fontSize: 13, fontWeight: awayOwner ? 700 : 400 }}>{g.away}</span>
                     {awayOwner && <OwnerBadge team={g.away} />}
                   </div>
                 </div>
@@ -273,124 +280,124 @@ export default function SweepstakeDashboard() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
           <div>
-            <p style={{ color: GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 4px" }}>World Cup 2026</p>
+            <p style={{ color: GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 4px", textShadow: `0 0 8px ${GREEN}88` }}>World Cup 2026</p>
             <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 900, margin: 0, letterSpacing: -1, lineHeight: 1 }}>Sweepstake</h1>
             <p style={{ color: INK_SUB, fontSize: 12, margin: "6px 0 0" }}>Updated {LAST_UPDATED}</p>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div style={{ textAlign: "right", background: "rgba(240,196,70,0.07)", border: "1px solid rgba(240,196,70,0.2)", borderRadius: 14, padding: "10px 14px", boxShadow: "0 0 20px rgba(240,196,70,0.1)" }}>
             <p style={{ color: GREEN, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 2px" }}>Leader</p>
-            <p style={{ color: "#fff", fontSize: 22, fontWeight: 900, margin: 0 }}><Trophy />{leader.name}</p>
-            <p style={{ color: GOLD, fontSize: 15, fontWeight: 700, margin: 0 }}>{leader.total} pts</p>
+            <p style={{ color: "#fff", fontSize: 20, fontWeight: 900, margin: 0 }}><Trophy />{leader.name}</p>
+            <p style={{ color: GOLD, fontSize: 15, fontWeight: 700, margin: 0, textShadow: `0 0 10px ${GOLD}` }}>{leader.total} pts</p>
           </div>
         </div>
 
         {/* Scrollable tabs */}
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", marginBottom: 16, paddingBottom: 4 }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", marginBottom: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
           <div style={{ display: "flex", gap: 8, minWidth: "max-content" }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setView(t.id)} style={{
-                padding: "10px 18px", borderRadius: 10, border: "none", cursor: "pointer",
+                padding: "10px 20px", borderRadius: 10, border: "none", cursor: "pointer",
                 fontSize: 13, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase",
                 background: view === t.id ? GREEN : "rgba(255,255,255,0.07)",
                 color: view === t.id ? NAVY : INK_SUB,
                 transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
+                boxShadow: view === t.id ? `0 0 16px ${GREEN}66` : "none",
               }}>{t.label}</button>
             ))}
           </div>
         </div>
 
-        {/* Charts */}
-        {(view === "standings" || view === "progression") && (
-          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 10px 12px 0", marginBottom: 16 }}>
-            {view === "standings" ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={ranked} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: INK_SUB, fontSize: 11 }} axisLine={false} tickLine={false} dy={6} />
-                  <YAxis tick={{ fill: INK_SUB, fontSize: 11 }} axisLine={false} tickLine={false} width={30} allowDecimals={false} />
-                  <Tooltip content={<RankTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]}>{ranked.map(p => <Cell key={p.name} fill={p.color} />)}</Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={PROGRESSION} margin={{ top: 6, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fill: INK_SUB, fontSize: 10 }} axisLine={false} tickLine={false} dy={6} />
-                  <YAxis tick={{ fill: INK_SUB, fontSize: 11 }} axisLine={false} tickLine={false} width={26} allowDecimals={false} />
-                  <Tooltip content={<LineTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                  {PLAYERS.map(p => <Line key={p.name} type="monotone" dataKey={p.name} stroke={p.color} strokeWidth={p.name === leader.name ? 3 : 1.5} dot={{ r: 3, fill: p.color }} activeDot={{ r: 5 }} />)}
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        )}
-
-        {/* Standings list */}
-        {view === "standings" && (
-          <>
-            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: 8, marginBottom: 16 }}>
-              {ranked.map((p, i) => {
-                const medal = ["#F0C446","#C0C0C0","#CD7F32"][i];
-                return (
-                  <div key={p.name} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 12px", borderBottom: i < ranked.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: medal || "rgba(255,255,255,0.08)", color: medal ? NAVY : INK_SUB, fontWeight: 800, fontSize: 13, marginTop: 2 }}>{i + 1}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: "#fff", fontSize: 15, fontWeight: 700, margin: "0 0 3px" }}>{p.name}</p>
-                      <p style={{ color: INK_SUB, fontSize: 11.5, margin: 0, lineHeight: 1.6, whiteSpace: "normal", wordBreak: "break-word" }}>{p.teams}</p>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 10, background: NAVY, display: "flex", alignItems: "center", justifyContent: "center", border: `1.5px solid ${p.color}` }}>
-                        <span style={{ color: "#fff", fontSize: 16, fontWeight: 800 }}>{p.total}</span>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <span style={{ color: INK_SUB, fontSize: 9 }}>PL {p.played}</span>
-                        <FormArrow name={p.name} size={15} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Tab content with fade animation */}
+        <TabPanel key={view}>
+          {/* Charts */}
+          {(view === "standings" || view === "progression") && (
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 10px 12px 0", marginBottom: 16 }}>
+              {view === "standings" ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={ranked} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fill: INK_SUB, fontSize: 11 }} axisLine={false} tickLine={false} dy={6} />
+                    <YAxis tick={{ fill: INK_SUB, fontSize: 11 }} axisLine={false} tickLine={false} width={30} allowDecimals={false} />
+                    <Tooltip content={<RankTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+                    <Bar dataKey="total" radius={[6, 6, 0, 0]}>{ranked.map(p => <Cell key={p.name} fill={p.color} />)}</Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={PROGRESSION} margin={{ top: 6, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis dataKey="day" tick={{ fill: INK_SUB, fontSize: 10 }} axisLine={false} tickLine={false} dy={6} />
+                    <YAxis tick={{ fill: INK_SUB, fontSize: 11 }} axisLine={false} tickLine={false} width={26} allowDecimals={false} />
+                    <Tooltip content={<LineTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                    {PLAYERS.map(p => <Line key={p.name} type="monotone" dataKey={p.name} stroke={p.color} strokeWidth={p.name === leader.name ? 3 : 1.5} dot={{ r: 3, fill: p.color }} activeDot={{ r: 5 }} />)}
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
-            <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 10px" }}>Latest results</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 16 }}>
-              {RECENT.map((m, i) => {
-                const wa = m.ga > m.gb, wb = m.gb > m.ga;
-                return (
-                  <div key={i} style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px", textAlign: "center" }}>
-                    <p style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 800 }}>
-                      <span style={{ color: wa ? "#fff" : INK_SUB }}>{m.ga}</span>
-                      <span style={{ color: INK_SUB, margin: "0 6px" }}>–</span>
-                      <span style={{ color: wb ? "#fff" : INK_SUB }}>{m.gb}</span>
-                    </p>
-                    <p style={{ color: "#B6C2D6", fontSize: 11.5, margin: 0 }}>{m.a} v {m.b}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+          )}
 
-        {/* Groups — 2 per row */}
-        {view === "groups" && (
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>Top 2 from each group advance. Best 8 third-placed teams also qualify. Dotted line = elimination cut-off.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+          {/* Standings list */}
+          {view === "standings" && (
+            <>
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: 8, marginBottom: 16 }}>
+                {ranked.map((p, i) => {
+                  const medal = ["#F0C446","#C0C0C0","#CD7F32"][i];
+                  return (
+                    <div key={p.name} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 12px", borderBottom: i < ranked.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+                      <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: medal || "rgba(255,255,255,0.08)", color: medal ? NAVY : INK_SUB, fontWeight: 800, fontSize: 13, marginTop: 2, boxShadow: medal ? `0 0 10px ${medal}88` : "none" }}>{i + 1}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ color: "#fff", fontSize: 15, fontWeight: 700, margin: "0 0 3px" }}>{p.name}</p>
+                        <p style={{ color: INK_SUB, fontSize: 11.5, margin: 0, lineHeight: 1.6, whiteSpace: "normal", wordBreak: "break-word" }}>{p.teams}</p>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
+                        <PtsBadge value={p.total} color={p.color} />
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <span style={{ color: INK_SUB, fontSize: 9 }}>PL {p.played}</span>
+                          <FormArrow name={p.name} size={15} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 10px", textShadow: `0 0 8px ${GREEN}88` }}>Latest results</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 16 }}>
+                {RECENT.map((m, i) => {
+                  const wa = m.ga > m.gb, wb = m.gb > m.ga;
+                  const winnerGlow = wa ? "rgba(64,198,160,0.12)" : wb ? "rgba(64,198,160,0.12)" : "transparent";
+                  return (
+                    <div key={i} style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px", textAlign: "center", boxShadow: `inset 0 0 20px ${winnerGlow}` }}>
+                      <p style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 800 }}>
+                        <span style={{ color: wa ? "#fff" : INK_SUB, textShadow: wa ? "0 0 10px rgba(255,255,255,0.4)" : "none" }}>{m.ga}</span>
+                        <span style={{ color: INK_SUB, margin: "0 6px" }}>–</span>
+                        <span style={{ color: wb ? "#fff" : INK_SUB, textShadow: wb ? "0 0 10px rgba(255,255,255,0.4)" : "none" }}>{m.gb}</span>
+                      </p>
+                      <p style={{ color: "#B6C2D6", fontSize: 11.5, margin: 0 }}>{m.a} v {m.b}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {view === "groups" && (
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>Top 2 advance automatically. Best 8 third-placed also qualify. Green bar = qualifying. Dotted line = elimination cut-off.</p>
               {GROUPS.map(g => <GroupCard key={g.name} group={g} />)}
             </div>
-          </div>
-        )}
+          )}
 
-        {view === "fixtures" && <FixturesTab />}
-        {view === "topteams" && <TopTeams />}
+          {view === "fixtures" && <FixturesTab />}
+          {view === "topteams" && <TopTeams />}
+        </TabPanel>
 
         {/* Scoring key */}
         <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: 8 }}>
           {[["WIN", 3, GREEN], ["DRAW", 1, "#5896FF"], ["LOSS", 0, INK_SUB]].map(([l, n, c]) => (
-            <div key={l} style={{ display: "flex", alignItems: "center", gap: 6, border: `1.5px solid ${c}`, borderRadius: 20, padding: "5px 14px" }}>
+            <div key={l} style={{ display: "flex", alignItems: "center", gap: 6, border: `1.5px solid ${c}`, borderRadius: 20, padding: "5px 14px", boxShadow: `0 0 8px ${c}33` }}>
               <span style={{ color: "#D2DAE6", fontSize: 11, fontWeight: 600, letterSpacing: 1 }}>{l}</span>
-              <span style={{ width: 18, height: 18, borderRadius: "50%", background: c, color: NAVY, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{n}</span>
+              <span style={{ width: 18, height: 18, borderRadius: "50%", background: c, color: NAVY, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 8px ${c}88` }}>{n}</span>
             </div>
           ))}
         </div>
