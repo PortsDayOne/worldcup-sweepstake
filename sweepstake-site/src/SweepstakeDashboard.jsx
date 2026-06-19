@@ -9,19 +9,17 @@ const GOLD = "#F0C446";
 const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
 
-// Upcoming fixtures — update each matchday
 const FIXTURES = [
-  { date: "Fri 19 Jun", time: "11pm BST", home: "Scotland",   away: "Morocco",      group: "C" },
-  { date: "Sat 20 Jun", time: "12am BST", home: "Türkiye",    away: "Paraguay",      group: "D" },
-  { date: "Sat 20 Jun", time: "11pm BST", home: "Netherlands",away: "Sweden",        group: "F" },
-  { date: "Sun 20 Jun", time: "2am BST",  home: "Brazil",     away: "Haiti",         group: "C" },
-  { date: "Sun 20 Jun", time: "2am BST",  home: "USA",        away: "Australia",     group: "D" },
-  { date: "Sun 20 Jun", time: "2am BST",  home: "Germany",    away: "Ivory Coast",   group: "E" },
-  { date: "Sun 21 Jun", time: "5am BST",  home: "Ecuador",    away: "Curacao",       group: "E" },
-  { date: "Sun 21 Jun", time: "5am BST",  home: "Tunisia",    away: "Japan",         group: "F" },
+  { date: "Fri 19 Jun", time: "11pm BST", home: "Scotland",    away: "Morocco",     group: "C" },
+  { date: "Sat 20 Jun", time: "12am BST", home: "Turkiye",     away: "Paraguay",    group: "D" },
+  { date: "Sat 20 Jun", time: "11pm BST", home: "Netherlands", away: "Sweden",      group: "F" },
+  { date: "Sun 20 Jun", time: "2am BST",  home: "Brazil",      away: "Haiti",       group: "C" },
+  { date: "Sun 20 Jun", time: "2am BST",  home: "USA",         away: "Australia",   group: "D" },
+  { date: "Sun 20 Jun", time: "2am BST",  home: "Germany",     away: "Ivory Coast", group: "E" },
+  { date: "Sun 21 Jun", time: "5am BST",  home: "Ecuador",     away: "Curacao",     group: "E" },
+  { date: "Sun 21 Jun", time: "5am BST",  home: "Tunisia",     away: "Japan",       group: "F" },
 ];
 
-// Form: compare last two progression rows
 function getForm(name) {
   if (PROGRESSION.length < 2) return "same";
   const prev = PROGRESSION[PROGRESSION.length - 2][name] ?? 0;
@@ -31,11 +29,21 @@ function getForm(name) {
   return "same";
 }
 
-function FormArrow({ name }) {
+function FormArrow({ name, size = 15 }) {
   const form = getForm(name);
-  if (form === "up")   return <span style={{ color: "#40C6A0", fontSize: 15, fontWeight: 800, marginLeft: 3 }}>↑</span>;
-  if (form === "down") return <span style={{ color: "#E0556E", fontSize: 15, fontWeight: 800, marginLeft: 3 }}>↓</span>;
-  return <span style={{ color: INK_SUB, fontSize: 15, marginLeft: 3 }}>→</span>;
+  const base = {
+    fontSize: size, fontWeight: 800, marginLeft: 3,
+    display: "inline-block", lineHeight: 1,
+  };
+  if (form === "up") return (
+    <span style={{
+      ...base, color: GREEN,
+      textShadow: "0 0 6px #40C6A0, 0 0 12px #40C6A0",
+      animation: "none",
+    }}>↑</span>
+  );
+  if (form === "down") return <span style={{ ...base, color: "#E0556E" }}>↓</span>;
+  return <span style={{ ...base, color: INK_SUB }}>→</span>;
 }
 
 function Trophy() {
@@ -44,11 +52,33 @@ function Trophy() {
   return <span style={{ fontSize: 24, filter: glow ? "drop-shadow(0 0 8px #F0C446) drop-shadow(0 0 16px #F0C446)" : "drop-shadow(0 0 2px #F0C44688)", transition: "filter 1.2s ease-in-out", marginRight: 4 }}>🏆</span>;
 }
 
-// Owner badge
 function OwnerBadge({ team }) {
   const owner = OWNERS[team];
   if (!owner) return null;
-  return <span style={{ background: PLAYER_COLORS[owner] || "#666", color: NAVY, fontSize: 9, fontWeight: 800, padding: "1px 5px", borderRadius: 4, flexShrink: 0, letterSpacing: 0.5, marginLeft: 4 }}>{owner.toUpperCase()}</span>;
+  return (
+    <span style={{
+      background: PLAYER_COLORS[owner] || "#666", color: NAVY,
+      fontSize: 8, fontWeight: 800, padding: "1px 4px", borderRadius: 3,
+      flexShrink: 0, letterSpacing: 0.3, whiteSpace: "nowrap",
+    }}>{owner.toUpperCase()}</span>
+  );
+}
+
+// Compute how many teams per player are currently in top-2 of their group
+function getQualifyingCounts() {
+  const counts = {};
+  PLAYERS.forEach(p => counts[p.name] = { q: 0, total: 0 });
+  GROUPS.forEach(g => {
+    const sorted = [...g.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+    sorted.forEach((t, i) => {
+      const owner = OWNERS[t.name];
+      if (owner && counts[owner]) {
+        counts[owner].total++;
+        if (i < 2) counts[owner].q++;
+      }
+    });
+  });
+  return counts;
 }
 
 const RankTooltip = ({ active, payload }) => {
@@ -82,23 +112,28 @@ const LineTooltip = ({ active, payload, label }) => {
 function GroupCard({ group }) {
   const sorted = [...group.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
   return (
-    <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "12px 14px" }}>
+    <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "10px 12px" }}>
       <p style={{ color: GREEN, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>{group.name}</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 24px 24px 24px 24px 28px", gap: 3, marginBottom: 4 }}>
-        <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 1 }}>TEAM</span>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 22px 22px 22px 22px 26px", gap: 2, marginBottom: 4 }}>
+        <span style={{ color: INK_SUB, fontSize: 9 }}>TEAM</span>
         {["GP","W","D","L","PTS"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, textAlign: "center" }}>{h}</span>)}
       </div>
       {sorted.map((t, i) => {
         const isTop2 = i < 2;
         return (
-          <div key={t.name} style={{ display: "grid", gridTemplateColumns: "1fr 24px 24px 24px 24px 28px", gap: 3, alignItems: "center", padding: "4px 0", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", opacity: isTop2 ? 1 : 0.65 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, minWidth: 0 }}>
-              {isTop2 && <div style={{ width: 2, height: 14, borderRadius: 1, background: GREEN, flexShrink: 0 }} />}
-              <span style={{ color: "#fff", fontSize: 11, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
-              <OwnerBadge team={t.name} />
+          <div key={t.name}>
+            {i === 2 && (
+              <div style={{ borderTop: "1px dashed rgba(255,255,255,0.2)", margin: "4px 0" }} />
+            )}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 22px 22px 22px 22px 26px", gap: 2, alignItems: "center", padding: "4px 0", opacity: isTop2 ? 1 : 0.55 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, minWidth: 0, overflow: "hidden" }}>
+                {isTop2 && <div style={{ width: 2, height: 12, borderRadius: 1, background: GREEN, flexShrink: 0 }} />}
+                <span style={{ color: "#fff", fontSize: 11, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0, flexShrink: 1 }}>{t.name}</span>
+                <OwnerBadge team={t.name} />
+              </div>
+              {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 10, textAlign: "center" }}>{v}</span>)}
+              <span style={{ color: isTop2 ? "#fff" : INK_SUB, fontSize: 11, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
             </div>
-            {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 11, textAlign: "center" }}>{v}</span>)}
-            <span style={{ color: isTop2 ? "#fff" : INK_SUB, fontSize: 12, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
           </div>
         );
       })}
@@ -107,29 +142,71 @@ function GroupCard({ group }) {
 }
 
 function TopTeams() {
-  // Flatten all teams from all groups and sort by pts then GD
-  const all = GROUPS.flatMap(g => g.teams.map(t => ({ ...t, gd: t.gf - t.ga })));
+  const all = GROUPS.flatMap(g => {
+    const sorted = [...g.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+    return sorted.map((t, i) => ({ ...t, gd: t.gf - t.ga, qualifying: i < 2 }));
+  });
   const sorted = [...all].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-  const top = sorted.slice(0, 16);
+
+  // Find where qualifying line is (first non-qualifying team after top section)
+  let splitIdx = sorted.findIndex(t => !t.qualifying);
+
+  // Player knockout summary
+  const qCounts = getQualifyingCounts();
+  const playerSummary = [...PLAYERS].sort((a, b) => b.total - a.total);
+
   return (
     <div>
-      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>Ranked by points, then goal difference. Shows the 16 best-performing teams in the tournament so far.</p>
-      <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 32px", gap: 4, padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          {["#", "TEAM", "PTS", "GD", "GF"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 10, fontWeight: 700, letterSpacing: 1, textAlign: h === "TEAM" ? "left" : "center" }}>{h}</span>)}
-        </div>
-        {top.map((t, i) => {
-          const medal = i === 0 ? GOLD : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : null;
+      {/* Player knockout summary */}
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Player Knockout Summary</p>
+      <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "10px 14px", marginBottom: 16 }}>
+        {playerSummary.map((p, i) => {
+          const q = qCounts[p.name] || { q: 0, total: 0 };
           return (
-            <div key={t.name} style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 32px", gap: 4, padding: "10px 14px", borderBottom: i < top.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", alignItems: "center", background: i % 2 === 1 ? "rgba(255,255,255,0.02)" : "transparent" }}>
-              <span style={{ color: medal || INK_SUB, fontSize: 12, fontWeight: medal ? 800 : 400, textAlign: "center" }}>{i + 1}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                <span style={{ color: "#fff", fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
-                <OwnerBadge team={t.name} />
+            <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: i < playerSummary.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
+              <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, flex: 1 }}>{p.name}</span>
+              <span style={{ color: INK_SUB, fontSize: 12 }}>{q.q}/{q.total} teams qualifying</span>
+              <div style={{ display: "flex", gap: 3 }}>
+                {Array.from({ length: q.total }).map((_, j) => (
+                  <div key={j} style={{ width: 10, height: 10, borderRadius: 2, background: j < q.q ? p.color : "rgba(255,255,255,0.15)" }} />
+                ))}
               </div>
-              <span style={{ color: "#fff", fontSize: 13, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
-              <span style={{ color: t.gd > 0 ? GREEN : t.gd < 0 ? "#E0556E" : INK_SUB, fontSize: 12, fontWeight: 600, textAlign: "center" }}>{t.gd > 0 ? `+${t.gd}` : t.gd}</span>
-              <span style={{ color: INK_SUB, fontSize: 12, textAlign: "center" }}>{t.gf}</span>
+              <FormArrow name={p.name} size={14} />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Full team rankings */}
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>All {sorted.length} Teams Ranked</p>
+      <p style={{ color: INK_SUB, fontSize: 11, margin: "0 0 10px" }}>Ranked by points then goal difference. Dotted line shows current qualification cut-off.</p>
+      <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 30px 30px 28px", gap: 4, padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          {["#", "TEAM", "PTS", "GD", "GF"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, fontWeight: 700, letterSpacing: 1, textAlign: h === "TEAM" ? "left" : "center" }}>{h}</span>)}
+        </div>
+        {sorted.map((t, i) => {
+          const medal = i === 0 ? GOLD : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : null;
+          const showDivider = i === splitIdx;
+          return (
+            <div key={t.name + i}>
+              {showDivider && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", background: "rgba(255,255,255,0.03)" }}>
+                  <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
+                  <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap" }}>Elimination zone</span>
+                  <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 30px 30px 28px", gap: 4, padding: "8px 12px", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent", opacity: t.qualifying ? 1 : 0.6 }}>
+                <span style={{ color: medal || INK_SUB, fontSize: 11, fontWeight: medal ? 800 : 400, textAlign: "center" }}>{i + 1}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, minWidth: 0 }}>
+                  <span style={{ color: "#fff", fontSize: 12, fontWeight: t.qualifying ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
+                  <OwnerBadge team={t.name} />
+                </div>
+                <span style={{ color: "#fff", fontSize: 12, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
+                <span style={{ color: t.gd > 0 ? GREEN : t.gd < 0 ? "#E0556E" : INK_SUB, fontSize: 11, fontWeight: 600, textAlign: "center" }}>{t.gd > 0 ? `+${t.gd}` : t.gd}</span>
+                <span style={{ color: INK_SUB, fontSize: 11, textAlign: "center" }}>{t.gf}</span>
+              </div>
             </div>
           );
         })}
@@ -139,12 +216,7 @@ function TopTeams() {
 }
 
 function FixturesTab() {
-  // Group fixtures by date
-  const byDate = FIXTURES.reduce((acc, f) => {
-    if (!acc[f.date]) acc[f.date] = [];
-    acc[f.date].push(f);
-    return acc;
-  }, {});
+  const byDate = FIXTURES.reduce((acc, f) => { if (!acc[f.date]) acc[f.date] = []; acc[f.date].push(f); return acc; }, {});
   return (
     <div>
       <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>All times in UK (BST). Coloured tags show your sweepstake players' teams.</p>
@@ -156,17 +228,17 @@ function FixturesTab() {
             const awayOwner = OWNERS[g.away];
             const hasOwner = homeOwner || awayOwner;
             return (
-              <div key={i} style={{ background: hasOwner ? "rgba(255,255,255,0.05)" : NAVY2, border: `1px solid ${hasOwner ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "12px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flexShrink: 0, minWidth: 62 }}>
-                  <p style={{ color: GOLD, fontSize: 13, fontWeight: 700, margin: 0 }}>{g.time}</p>
+              <div key={i} style={{ background: hasOwner ? "rgba(255,255,255,0.06)" : NAVY2, border: `1px solid ${hasOwner ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "11px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flexShrink: 0, minWidth: 58 }}>
+                  <p style={{ color: GOLD, fontSize: 12, fontWeight: 700, margin: 0 }}>{g.time}</p>
                   <p style={{ color: INK_SUB, fontSize: 10, margin: 0 }}>Grp {g.group}</p>
                 </div>
-                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ color: "#fff", fontSize: 13, fontWeight: homeOwner ? 700 : 400 }}>{g.home}</span>
                     {homeOwner && <OwnerBadge team={g.home} />}
                   </div>
-                  <span style={{ color: INK_SUB, fontSize: 12 }}>vs</span>
+                  <span style={{ color: INK_SUB, fontSize: 11 }}>vs</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ color: "#fff", fontSize: 13, fontWeight: awayOwner ? 700 : 400 }}>{g.away}</span>
                     {awayOwner && <OwnerBadge team={g.away} />}
@@ -194,13 +266,6 @@ export default function SweepstakeDashboard() {
     { id: "topteams",    label: "Top Teams" },
   ];
 
-  const tabStyle = (active) => ({
-    flex: 1, padding: "8px 2px", borderRadius: 8, border: "none", cursor: "pointer",
-    fontSize: 10, fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase",
-    background: active ? GREEN : "rgba(255,255,255,0.05)",
-    color: active ? NAVY : INK_SUB, transition: "all 0.2s",
-  });
-
   return (
     <div style={{ background: `linear-gradient(160deg, ${NAVY} 0%, ${NAVY2} 100%)`, minHeight: "100vh", fontFamily: "'Inter','Helvetica Neue',sans-serif", padding: "20px 16px", display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: 760 }}>
@@ -219,12 +284,22 @@ export default function SweepstakeDashboard() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 6, margin: "0 0 16px" }}>
-          {tabs.map(t => <button key={t.id} style={tabStyle(view === t.id)} onClick={() => setView(t.id)}>{t.label}</button>)}
+        {/* Scrollable tabs */}
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", marginBottom: 16, paddingBottom: 4 }}>
+          <div style={{ display: "flex", gap: 8, minWidth: "max-content" }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setView(t.id)} style={{
+                padding: "10px 18px", borderRadius: 10, border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase",
+                background: view === t.id ? GREEN : "rgba(255,255,255,0.07)",
+                color: view === t.id ? NAVY : INK_SUB,
+                transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
+              }}>{t.label}</button>
+            ))}
+          </div>
         </div>
 
-        {/* Chart panels */}
+        {/* Charts */}
         {(view === "standings" || view === "progression") && (
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 10px 12px 0", marginBottom: 16 }}>
             {view === "standings" ? (
@@ -271,7 +346,7 @@ export default function SweepstakeDashboard() {
                       </div>
                       <div style={{ display: "flex", alignItems: "center" }}>
                         <span style={{ color: INK_SUB, fontSize: 9 }}>PL {p.played}</span>
-                        <FormArrow name={p.name} />
+                        <FormArrow name={p.name} size={15} />
                       </div>
                     </div>
                   </div>
@@ -289,7 +364,7 @@ export default function SweepstakeDashboard() {
                       <span style={{ color: INK_SUB, margin: "0 6px" }}>–</span>
                       <span style={{ color: wb ? "#fff" : INK_SUB }}>{m.gb}</span>
                     </p>
-                    <p style={{ color: "#B6C2D6", fontSize: 11.5, margin: 0, lineHeight: 1.4 }}>{m.a} v {m.b}</p>
+                    <p style={{ color: "#B6C2D6", fontSize: 11.5, margin: 0 }}>{m.a} v {m.b}</p>
                   </div>
                 );
               })}
@@ -300,7 +375,7 @@ export default function SweepstakeDashboard() {
         {/* Groups — 2 per row */}
         {view === "groups" && (
           <div style={{ marginBottom: 16 }}>
-            <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>Top 2 from each group advance. Best 8 third-placed teams also qualify. Coloured tags show sweepstake owner.</p>
+            <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>Top 2 from each group advance. Best 8 third-placed teams also qualify. Dotted line = elimination cut-off.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {GROUPS.map(g => <GroupCard key={g.name} group={g} />)}
             </div>
