@@ -9,6 +9,39 @@ const GOLD = "#F0C446";
 const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
 
+// Mathematically confirmed through to knockout round
+const CONFIRMED = new Set(["Mexico", "USA"]);
+// Mathematically eliminated from knockout round  
+const ELIMINATED = new Set(["Haiti", "Turkiye"]);
+
+// Returns highlight colour for a team name, or null
+function teamColor(name) {
+  if (CONFIRMED.has(name)) return "#40C6A0";
+  if (ELIMINATED.has(name)) return "#E0556E";
+  return null;
+}
+
+// Renders a "Team (pts), Team (pts)" string with green/red highlights inline
+function TeamsText({ text, baseColor = "#8694AC" }) {
+  const parts = text.split(", ");
+  return (
+    <span>
+      {parts.map((part, i) => {
+        const match = part.match(/^(.+?)\s*\(\d+\)/);
+        const name = match ? match[1].trim() : part;
+        const col = teamColor(name);
+        return (
+          <span key={i}>
+            <span style={{ color: col || baseColor, fontWeight: col ? 700 : 400,
+              textShadow: col ? `0 0 6px ${col}88` : "none" }}>{part}</span>
+            {i < parts.length - 1 && <span style={{ color: baseColor }}>, </span>}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 const FIXTURES = [
   { date: "Sat 20 Jun", time: "9pm BST",  home: "Germany",     away: "Ivory Coast", group: "E" },
   { date: "Sun 21 Jun", time: "12am BST", home: "Ecuador",     away: "Curacao",     group: "E" },
@@ -142,7 +175,8 @@ function GroupCard({ group }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 30px 28px 28px 28px 32px", gap: 4, alignItems: "center", padding: "5px 0", borderBottom: i < sorted.length - 1 && i !== 1 ? "1px solid rgba(255,255,255,0.04)" : "none", opacity: isTop2 ? 1 : 0.55 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
                 {isTop2 && <div style={{ width: 3, height: 14, borderRadius: 2, background: GREEN, flexShrink: 0, boxShadow: `0 0 6px ${GREEN}` }} />}
-                <span style={{ color: "#fff", fontSize: 13, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
+                <span style={{ color: teamColor(t.name) || (isTop2 ? "#fff" : INK_SUB), fontSize: 13, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  textShadow: teamColor(t.name) ? `0 0 8px ${teamColor(t.name)}88` : "none" }}>{t.name}</span>
                 <OwnerBadge team={t.name} />
               </div>
               {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 12, textAlign: "center" }}>{v}</span>)}
@@ -207,7 +241,8 @@ function TopTeams() {
               <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 28px", gap: 4, padding: "8px 14px", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent", opacity: t.qualifying ? 1 : 0.55 }}>
                 <span style={{ color: medal || INK_SUB, fontSize: 11, fontWeight: medal ? 800 : 400, textAlign: "center", textShadow: medal ? `0 0 8px ${medal}` : "none" }}>{i + 1}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                  <span style={{ color: "#fff", fontSize: 12, fontWeight: t.qualifying ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
+                  <span style={{ color: teamColor(t.name) || "#fff", fontSize: 12, fontWeight: t.qualifying ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    textShadow: teamColor(t.name) ? `0 0 8px ${teamColor(t.name)}88` : "none" }}>{t.name}</span>
                   <OwnerBadge team={t.name} />
                 </div>
                 <span style={{ color: "#fff", fontSize: 12, fontWeight: 800, textAlign: "center", textShadow: "0 0 8px rgba(255,255,255,0.3)" }}>{t.pts}</span>
@@ -320,7 +355,8 @@ function FlipCard({ player }) {
             <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: i < player.teams.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <span style={{ fontSize: 16 }}>{t.f}</span>
-                <span style={{ color: t.p > 0 ? "#fff" : INK_SUB, fontSize: 13, fontWeight: t.p > 0 ? 600 : 400 }}>{t.n}</span>
+                <span style={{ color: teamColor(t.n) || (t.p > 0 ? "#fff" : INK_SUB), fontSize: 13, fontWeight: t.p > 0 ? 600 : 400,
+                  textShadow: teamColor(t.n) ? `0 0 8px ${teamColor(t.n)}88` : "none" }}>{t.n}</span>
               </div>
               <span style={{ color: t.p >= 3 ? col : t.p > 0 ? "#B6C2D6" : INK_SUB, fontSize: 13, fontWeight: 700, textShadow: t.p >= 3 ? `0 0 8px ${col}` : "none" }}>
                 {t.p > 0 ? `+${t.p}` : "—"}
@@ -472,15 +508,21 @@ export default function SweepstakeDashboard() {
           {/* Standings list */}
           {view === "standings" && (
             <>
+              <div style={{ display: "flex", gap: 14, marginBottom: 8 }}>
+                <span style={{ color: "#40C6A0", fontSize: 11, fontWeight: 700, textShadow: "0 0 6px #40C6A088" }}>● Confirmed through</span>
+                <span style={{ color: "#E0556E", fontSize: 11, fontWeight: 700, textShadow: "0 0 6px #E0556E88" }}>● Eliminated</span>
+              </div>
               <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: 8, marginBottom: 16 }}>
                 {ranked.map((p, i) => {
                   const medal = ["#F0C446","#C0C0C0","#CD7F32"][i];
                   return (
-                    <div key={p.name} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 12px", borderBottom: i < ranked.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 12px", borderBottom: i < ranked.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
                       <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: medal || "rgba(255,255,255,0.08)", color: medal ? NAVY : INK_SUB, fontWeight: 800, fontSize: 13, marginTop: 2, boxShadow: medal ? `0 0 10px ${medal}88` : "none" }}>{i + 1}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: "#fff", fontSize: 15, fontWeight: 700, margin: "0 0 3px" }}>{p.name}</p>
-                        <p style={{ color: INK_SUB, fontSize: 11.5, margin: 0, lineHeight: 1.6, whiteSpace: "normal", wordBreak: "break-word" }}>{p.teams}</p>
+                        <p style={{ color: INK_SUB, fontSize: 11.5, margin: 0, lineHeight: 1.6, whiteSpace: "normal", wordBreak: "break-word" }}>
+                      <TeamsText text={p.teams} baseColor={INK_SUB} />
+                    </p>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
                         <PtsBadge value={p.total} color={p.color} />
