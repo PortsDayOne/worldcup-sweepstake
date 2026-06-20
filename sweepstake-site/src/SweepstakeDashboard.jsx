@@ -280,20 +280,21 @@ function FlipCard({ player }) {
   return (
     <div
       onClick={() => setFlipped(f => !f)}
-      style={{ cursor: "pointer", perspective: "1000px", height: 200 }}
+      style={{ cursor: "pointer", perspective: "1000px", height: flipped ? "auto" : 200, minHeight: 200 }}
     >
       <div style={{
         position: "relative", width: "100%", height: "100%",
         transformStyle: "preserve-3d",
         transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
         transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        minHeight: 200,
       }}>
         {/* Front */}
         <div style={{
-          position: "absolute", inset: 0, backfaceVisibility: "hidden",
+          position: flipped ? "absolute" : "relative", inset: 0, backfaceVisibility: "hidden",
           borderRadius: 16, background: `linear-gradient(135deg, ${col}22, ${col}08)`,
           border: `1.5px solid ${col}55`, display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center", gap: 8,
+          alignItems: "center", justifyContent: "center", gap: 8, minHeight: 200,
           boxShadow: `0 0 20px ${col}22, inset 0 0 30px ${col}08`,
         }}>
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: col, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 16px ${col}88`, fontSize: 22, fontWeight: 900, color: "#0E1A2E" }}>
@@ -305,7 +306,7 @@ function FlipCard({ player }) {
         </div>
         {/* Back */}
         <div style={{
-          position: "absolute", inset: 0, backfaceVisibility: "hidden",
+          position: flipped ? "relative" : "absolute", inset: 0, backfaceVisibility: "hidden",
           transform: "rotateY(180deg)", borderRadius: 16,
           background: `linear-gradient(135deg, ${NAVY2}, ${NAVY})`,
           border: `1.5px solid ${col}55`, padding: "14px 16px",
@@ -316,16 +317,17 @@ function FlipCard({ player }) {
             <p style={{ color: GOLD, fontSize: 13, fontWeight: 800, margin: 0 }}>{total} pts</p>
           </div>
           {player.teams.map((t, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", borderBottom: i < player.teams.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: i < player.teams.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <span style={{ fontSize: 16 }}>{t.f}</span>
-                <span style={{ color: t.p > 0 ? "#fff" : INK_SUB, fontSize: 12, fontWeight: t.p > 0 ? 600 : 400 }}>{t.n}</span>
+                <span style={{ color: t.p > 0 ? "#fff" : INK_SUB, fontSize: 13, fontWeight: t.p > 0 ? 600 : 400 }}>{t.n}</span>
               </div>
-              <span style={{ color: t.p >= 3 ? col : t.p > 0 ? "#B6C2D6" : INK_SUB, fontSize: 12, fontWeight: 700, textShadow: t.p >= 3 ? `0 0 8px ${col}` : "none" }}>
+              <span style={{ color: t.p >= 3 ? col : t.p > 0 ? "#B6C2D6" : INK_SUB, fontSize: 13, fontWeight: 700, textShadow: t.p >= 3 ? `0 0 8px ${col}` : "none" }}>
                 {t.p > 0 ? `+${t.p}` : "—"}
               </span>
             </div>
           ))}
+          <p style={{ color: INK_SUB, fontSize: 10, textAlign: "center", margin: "10px 0 0", letterSpacing: 1 }}>TAP TO FLIP BACK</p>
         </div>
       </div>
     </div>
@@ -356,10 +358,10 @@ export default function SweepstakeDashboard() {
   const tabs = [
     { id: "standings",   label: "Standings" },
     { id: "progression", label: "Progress" },
+    { id: "squads",      label: "Squads" },
     { id: "groups",      label: "Groups" },
     { id: "fixtures",    label: "Fixtures" },
     { id: "topteams",    label: "Top Teams" },
-    { id: "squads",      label: "Squads" },
   ];
 
   return (
