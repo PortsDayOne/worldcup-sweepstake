@@ -12,7 +12,7 @@ const INK_SUB = "#8694AC";
 // Mathematically confirmed through to knockout round
 const CONFIRMED = new Set(["Mexico", "USA"]);
 // Mathematically eliminated from knockout round  
-const ELIMINATED = new Set(["Haiti", "Turkiye"]);
+const ELIMINATED = new Set(["Haiti", "Türkiye", "Turkiye"]);
 
 // Returns highlight colour for a team name, or null
 function teamColor(name) {
@@ -229,6 +229,10 @@ function TopTeams() {
         </div>
         {sorted.map((t, i) => {
           const medal = i === 0 ? GOLD : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : null;
+          const isConfirmed = CONFIRMED.has(t.name);
+          const isEliminated = ELIMINATED.has(t.name);
+          const rowBg = isConfirmed ? "rgba(64,198,160,0.12)" : isEliminated ? "rgba(224,85,110,0.12)" : i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent";
+          const leftBorder = isConfirmed ? "3px solid #40C6A0" : isEliminated ? "3px solid #E0556E" : "3px solid transparent";
           return (
             <div key={t.name + i}>
               {i === splitIdx && (
@@ -238,14 +242,15 @@ function TopTeams() {
                   <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
                 </div>
               )}
-              <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 28px", gap: 4, padding: "8px 14px", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent", opacity: t.qualifying ? 1 : 0.55 }}>
-                <span style={{ color: medal || INK_SUB, fontSize: 11, fontWeight: medal ? 800 : 400, textAlign: "center", textShadow: medal ? `0 0 8px ${medal}` : "none" }}>{i + 1}</span>
+              <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 32px 32px 28px", gap: 4, padding: "9px 14px", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", borderLeft: leftBorder, alignItems: "center", background: rowBg, opacity: (!isConfirmed && !isEliminated && !t.qualifying) ? 0.5 : 1, boxShadow: isConfirmed ? "inset 0 0 20px rgba(64,198,160,0.06)" : isEliminated ? "inset 0 0 20px rgba(224,85,110,0.06)" : "none" }}>
+                <span style={{ color: medal || (isConfirmed ? "#40C6A0" : isEliminated ? "#E0556E" : INK_SUB), fontSize: 11, fontWeight: 800, textAlign: "center", textShadow: isConfirmed ? "0 0 10px #40C6A0" : isEliminated ? "0 0 10px #E0556E" : medal ? `0 0 8px ${medal}` : "none" }}>{i + 1}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                  <span style={{ color: teamColor(t.name) || "#fff", fontSize: 12, fontWeight: t.qualifying ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    textShadow: teamColor(t.name) ? `0 0 8px ${teamColor(t.name)}88` : "none" }}>{t.name}</span>
+                  <span style={{ color: isConfirmed ? "#40C6A0" : isEliminated ? "#E0556E" : "#fff", fontSize: 12, fontWeight: isConfirmed || isEliminated ? 800 : t.qualifying ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textShadow: isConfirmed ? "0 0 12px #40C6A0, 0 0 24px #40C6A066" : isEliminated ? "0 0 12px #E0556E, 0 0 24px #E0556E66" : "none" }}>{t.name}</span>
+                  {isConfirmed && <span style={{ background: "#40C6A0", color: "#0E1A2E", fontSize: 8, fontWeight: 900, padding: "2px 5px", borderRadius: 4, flexShrink: 0, letterSpacing: 0.5, boxShadow: "0 0 8px #40C6A0" }}>✓ THROUGH</span>}
+                  {isEliminated && <span style={{ background: "#E0556E", color: "#fff", fontSize: 8, fontWeight: 900, padding: "2px 5px", borderRadius: 4, flexShrink: 0, letterSpacing: 0.5, boxShadow: "0 0 8px #E0556E" }}>✗ OUT</span>}
                   <OwnerBadge team={t.name} />
                 </div>
-                <span style={{ color: "#fff", fontSize: 12, fontWeight: 800, textAlign: "center", textShadow: "0 0 8px rgba(255,255,255,0.3)" }}>{t.pts}</span>
+                <span style={{ color: isConfirmed ? "#40C6A0" : isEliminated ? "#E0556E" : "#fff", fontSize: 12, fontWeight: 800, textAlign: "center", textShadow: isConfirmed ? "0 0 8px #40C6A0" : isEliminated ? "0 0 8px #E0556E" : "0 0 8px rgba(255,255,255,0.3)" }}>{t.pts}</span>
                 <span style={{ color: t.gd > 0 ? GREEN : t.gd < 0 ? "#E0556E" : INK_SUB, fontSize: 11, fontWeight: 600, textAlign: "center", textShadow: t.gd !== 0 ? `0 0 6px ${t.gd > 0 ? GREEN : "#E0556E"}88` : "none" }}>{t.gd > 0 ? `+${t.gd}` : t.gd}</span>
                 <span style={{ color: INK_SUB, fontSize: 11, textAlign: "center" }}>{t.gf}</span>
               </div>
