@@ -260,6 +260,94 @@ function FixturesTab() {
   );
 }
 
+// Squad data: each player's 6 teams with flags (emoji) and current points
+const SQUAD_DATA = [
+  { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:6 },{ f:"🇲🇦", n:"Morocco", p:4 },{ f:"🇦🇷", n:"Argentina", p:3 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:3 },{ f:"🇳🇱", n:"Netherlands", p:1 },{ f:"🇵🇾", n:"Paraguay", p:3 }] },
+  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:4 },{ f:"🇦🇺", n:"Australia", p:3 },{ f:"🇨🇮", n:"Ivory Coast", p:3 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:1 }] },
+  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:3 },{ f:"🇳🇴", n:"Norway", p:3 },{ f:"🇸🇪", n:"Sweden", p:3 },{ f:"🇪🇸", n:"Spain", p:1 },{ f:"🇺🇾", n:"Uruguay", p:1 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
+  { name: "Joanne",  teams: [{ f:"🇨🇦", n:"Canada", p:4 },{ f:"🇩🇪", n:"Germany", p:3 },{ f:"🇨🇴", n:"Colombia", p:3 },{ f:"🇿🇦", n:"South Africa", p:1 },{ f:"🇨🇼", n:"Curaçao", p:0 },{ f:"🇹🇳", n:"Tunisia", p:0 }] },
+  { name: "Joe",     teams: [{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:1 },{ f:"🇯🇵", n:"Japan", p:1 },{ f:"🇮🇷", n:"Iran", p:1 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
+  { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:3 },{ f:"🇨🇭", n:"Switzerland", p:4 },{ f:"🇵🇹", n:"Portugal", p:1 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇪🇨", n:"Ecuador", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
+  { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:1 },{ f:"🇸🇳", n:"Senegal", p:0 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:0 }] },
+  { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:1 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:0 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:0 }] },
+];
+
+function FlipCard({ player }) {
+  const [flipped, setFlipped] = useState(false);
+  const col = PLAYER_COLORS[player.name] || "#666";
+  const total = player.teams.reduce((s, t) => s + t.p, 0);
+
+  return (
+    <div
+      onClick={() => setFlipped(f => !f)}
+      style={{ cursor: "pointer", perspective: "1000px", height: 200 }}
+    >
+      <div style={{
+        position: "relative", width: "100%", height: "100%",
+        transformStyle: "preserve-3d",
+        transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+      }}>
+        {/* Front */}
+        <div style={{
+          position: "absolute", inset: 0, backfaceVisibility: "hidden",
+          borderRadius: 16, background: `linear-gradient(135deg, ${col}22, ${col}08)`,
+          border: `1.5px solid ${col}55`, display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: 8,
+          boxShadow: `0 0 20px ${col}22, inset 0 0 30px ${col}08`,
+        }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: col, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 16px ${col}88`, fontSize: 22, fontWeight: 900, color: "#0E1A2E" }}>
+            {player.name[0]}
+          </div>
+          <p style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>{player.name}</p>
+          <p style={{ color: col, fontSize: 24, fontWeight: 900, margin: 0, textShadow: `0 0 12px ${col}` }}>{total} pts</p>
+          <p style={{ color: INK_SUB, fontSize: 10, margin: 0, letterSpacing: 1 }}>TAP TO SEE SQUAD</p>
+        </div>
+        {/* Back */}
+        <div style={{
+          position: "absolute", inset: 0, backfaceVisibility: "hidden",
+          transform: "rotateY(180deg)", borderRadius: 16,
+          background: `linear-gradient(135deg, ${NAVY2}, ${NAVY})`,
+          border: `1.5px solid ${col}55`, padding: "14px 16px",
+          boxShadow: `0 0 20px ${col}22`,
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <p style={{ color: col, fontSize: 13, fontWeight: 800, margin: 0, textShadow: `0 0 6px ${col}` }}>{player.name}'s Squad</p>
+            <p style={{ color: GOLD, fontSize: 13, fontWeight: 800, margin: 0 }}>{total} pts</p>
+          </div>
+          {player.teams.map((t, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", borderBottom: i < player.teams.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <span style={{ fontSize: 16 }}>{t.f}</span>
+                <span style={{ color: t.p > 0 ? "#fff" : INK_SUB, fontSize: 12, fontWeight: t.p > 0 ? 600 : 400 }}>{t.n}</span>
+              </div>
+              <span style={{ color: t.p >= 3 ? col : t.p > 0 ? "#B6C2D6" : INK_SUB, fontSize: 12, fontWeight: 700, textShadow: t.p >= 3 ? `0 0 8px ${col}` : "none" }}>
+                {t.p > 0 ? `+${t.p}` : "—"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SquadsTab() {
+  const orderedPlayers = [...SQUAD_DATA].sort((a, b) => {
+    const pa = PLAYERS.find(p => p.name === a.name);
+    const pb = PLAYERS.find(p => p.name === b.name);
+    return (pb?.total || 0) - (pa?.total || 0);
+  });
+  return (
+    <div>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 14px", lineHeight: 1.6 }}>Tap any card to flip and see a player's full squad and points. Sorted by current standings.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 16 }}>
+        {orderedPlayers.map(p => <FlipCard key={p.name} player={p} />)}
+      </div>
+    </div>
+  );
+}
+
 export default function SweepstakeDashboard() {
   const [view, setView] = useState("standings");
   const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
@@ -271,6 +359,7 @@ export default function SweepstakeDashboard() {
     { id: "groups",      label: "Groups" },
     { id: "fixtures",    label: "Fixtures" },
     { id: "topteams",    label: "Top Teams" },
+    { id: "squads",      label: "Squads" },
   ];
 
   return (
@@ -431,6 +520,7 @@ export default function SweepstakeDashboard() {
 
           {view === "fixtures" && <FixturesTab />}
           {view === "topteams" && <TopTeams />}
+          {view === "squads" && <SquadsTab />}
         </TabPanel>
 
         {/* Scoring key */}
