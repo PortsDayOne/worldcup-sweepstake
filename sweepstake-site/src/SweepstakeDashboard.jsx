@@ -10,14 +10,14 @@ const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
 
 const FIXTURES = [
-  { date: "Fri 19 Jun", time: "11pm BST", home: "Scotland",    away: "Morocco",     group: "C" },
-  { date: "Sat 20 Jun", time: "12am BST", home: "Turkiye",     away: "Paraguay",    group: "D" },
-  { date: "Sat 20 Jun", time: "11pm BST", home: "Netherlands", away: "Sweden",      group: "F" },
-  { date: "Sun 20 Jun", time: "2am BST",  home: "Brazil",      away: "Haiti",       group: "C" },
-  { date: "Sun 20 Jun", time: "2am BST",  home: "USA",         away: "Australia",   group: "D" },
-  { date: "Sun 20 Jun", time: "2am BST",  home: "Germany",     away: "Ivory Coast", group: "E" },
-  { date: "Sun 21 Jun", time: "5am BST",  home: "Ecuador",     away: "Curacao",     group: "E" },
-  { date: "Sun 21 Jun", time: "5am BST",  home: "Tunisia",     away: "Japan",       group: "F" },
+  { date: "Sat 20 Jun", time: "9pm BST",  home: "Germany",     away: "Ivory Coast", group: "E" },
+  { date: "Sun 21 Jun", time: "12am BST", home: "Ecuador",     away: "Curacao",     group: "E" },
+  { date: "Sun 21 Jun", time: "12am BST", home: "Netherlands", away: "Sweden",      group: "F" },
+  { date: "Sun 21 Jun", time: "3am BST",  home: "Tunisia",     away: "Japan",       group: "F" },
+  { date: "Sun 21 Jun", time: "9pm BST",  home: "Belgium",     away: "Egypt",       group: "G" },
+  { date: "Mon 22 Jun", time: "12am BST", home: "Iran",        away: "New Zealand", group: "G" },
+  { date: "Mon 22 Jun", time: "12am BST", home: "Spain",       away: "Saudi Arabia",group: "H" },
+  { date: "Mon 22 Jun", time: "3am BST",  home: "Uruguay",     away: "Cape Verde",  group: "H" },
 ];
 
 function getForm(name) {
@@ -343,6 +343,38 @@ export default function SweepstakeDashboard() {
                   </LineChart>
                 </ResponsiveContainer>
               )}
+            </div>
+          )}
+
+          {/* Player narrative commentary — progression tab only */}
+          {view === "progression" && (
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 12px", textShadow: `0 0 8px ${GREEN}88` }}>Form Guide</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  { name: "Lottie", emoji: "🔥", headline: "On fire", text: "The only player with five wins from six teams, Lottie has quietly assembled the most balanced squad in the draw. Morocco and Paraguay both pulled off surprise wins — she's benefiting from depth others don't have." },
+                  { name: "Tom",    emoji: "⚡", headline: "Powerhouse", text: "Tom has the tournament's joint-best team in USA and a Brazil side finding their rhythm under Ancelotti. The concern is Bosnia and Saudi Arabia are unlikely to score many more points — he needs his big guns to go deep." },
+                  { name: "Sam",    emoji: "🎯", headline: "Flattering to deceive?", text: "France and Norway are legitimate title contenders on paper, but Sam's line has gone flat since June 15. None of his remaining teams have played yet — big games incoming that could shoot him into contention or leave him stranded." },
+                  { name: "Joanne", emoji: "📈", headline: "The comeback", text: "Joanne was bottom at the start, but three clean wins from Germany, Colombia and Canada have transformed her campaign. She arguably has the most exciting group-stage teams still with games to play." },
+                  { name: "Joe",    emoji: "🤞", headline: "Steady but needs a break", text: "Seven teams have now played and Joe has accumulated points from six of them — the most consistent converter in the sweepstake. The problem is none of his teams have won a game outright yet. He's living on draws." },
+                  { name: "Darrell",emoji: "🎲", headline: "Swings and roundabouts", text: "Ghana's surprise win and Switzerland's 4-1 demolition of Bosnia showed Darrell has some punchers in his squad. But Haiti and Panama are already eliminated — his ceiling depends almost entirely on how far Portugal can go." },
+                  { name: "Matt",   emoji: "😬", headline: "Painful viewing", text: "Matt's Scotland lost to Morocco despite winning their opener, and Algeria, Senegal and Iraq all lost their first games. Austria winning was a rare bright spot. He urgently needs France, Norway or Argentina to crash out." },
+                  { name: "Karina", emoji: "💀", headline: "Miracle needed", text: "Türkiye eliminated, Jordan eliminated, Croatia and Qatar both in dire shape — Karina's squad is the worst performing in the tournament by a distance. Cape Verde holding Spain is the only joy so far, and even that's just a draw." },
+                ].map((p, i) => {
+                  const player = PLAYERS.find(pl => pl.name === p.name);
+                  const col = player?.color || "#666";
+                  return (
+                    <div key={p.name} style={{ background: NAVY2, border: `1px solid ${col}33`, borderLeft: `3px solid ${col}`, borderRadius: 12, padding: "12px 14px", boxShadow: `0 0 12px ${col}11` }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                        <span style={{ fontSize: 16 }}>{p.emoji}</span>
+                        <span style={{ color: col, fontSize: 13, fontWeight: 800, textShadow: `0 0 6px ${col}88` }}>{p.name}</span>
+                        <span style={{ color: col, fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", opacity: 0.8 }}>— {p.headline}</span>
+                      </div>
+                      <p style={{ color: "#B6C2D6", fontSize: 12.5, margin: 0, lineHeight: 1.65 }}>{p.text}</p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
