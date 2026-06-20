@@ -169,18 +169,24 @@ function GroupCard({ group }) {
       </div>
       {sorted.map((t, i) => {
         const isTop2 = i < 2;
+        const isConfirmed = CONFIRMED.has(t.name);
+        const isEliminated = ELIMINATED.has(t.name);
+        const rowBg = isConfirmed ? "rgba(64,198,160,0.10)" : isEliminated ? "rgba(224,85,110,0.10)" : "transparent";
+        const leftBorder = isConfirmed ? "3px solid #40C6A0" : isEliminated ? "3px solid #E0556E" : "3px solid transparent";
         return (
           <div key={t.name}>
             {i === 2 && <div style={{ borderTop: "1px dashed rgba(255,255,255,0.25)", margin: "5px 0" }} />}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 30px 28px 28px 28px 32px", gap: 4, alignItems: "center", padding: "5px 0", borderBottom: i < sorted.length - 1 && i !== 1 ? "1px solid rgba(255,255,255,0.04)" : "none", opacity: isTop2 ? 1 : 0.55 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                {isTop2 && <div style={{ width: 3, height: 14, borderRadius: 2, background: GREEN, flexShrink: 0, boxShadow: `0 0 6px ${GREEN}` }} />}
-                <span style={{ color: teamColor(t.name) || (isTop2 ? "#fff" : INK_SUB), fontSize: 13, fontWeight: isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  textShadow: teamColor(t.name) ? `0 0 8px ${teamColor(t.name)}88` : "none" }}>{t.name}</span>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 30px 28px 28px 28px 32px", gap: 4, alignItems: "center", padding: "6px 4px", borderBottom: i < sorted.length - 1 && i !== 1 ? "1px solid rgba(255,255,255,0.04)" : "none", borderLeft: leftBorder, paddingLeft: 6, background: rowBg, borderRadius: 6, opacity: (!isConfirmed && !isEliminated && !isTop2) ? 0.55 : 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, minWidth: 0 }}>
+                {isTop2 && !isConfirmed && <div style={{ width: 3, height: 14, borderRadius: 2, background: GREEN, flexShrink: 0, boxShadow: `0 0 6px ${GREEN}` }} />}
+                <span style={{ color: isConfirmed ? "#40C6A0" : isEliminated ? "#E0556E" : (isTop2 ? "#fff" : INK_SUB), fontSize: 12, fontWeight: isConfirmed || isEliminated || isTop2 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  textShadow: isConfirmed ? "0 0 10px #40C6A0" : isEliminated ? "0 0 10px #E0556E" : "none" }}>{t.name}</span>
+                {isConfirmed && <span style={{ background: "#40C6A0", color: "#0E1A2E", fontSize: 7, fontWeight: 900, padding: "1px 4px", borderRadius: 3, flexShrink: 0, boxShadow: "0 0 6px #40C6A0" }}>✓</span>}
+                {isEliminated && <span style={{ background: "#E0556E", color: "#fff", fontSize: 7, fontWeight: 900, padding: "1px 4px", borderRadius: 3, flexShrink: 0, boxShadow: "0 0 6px #E0556E" }}>✗</span>}
                 <OwnerBadge team={t.name} />
               </div>
-              {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 12, textAlign: "center" }}>{v}</span>)}
-              <span style={{ color: isTop2 ? "#fff" : INK_SUB, fontSize: 13, fontWeight: 800, textAlign: "center", textShadow: isTop2 ? "0 0 8px rgba(255,255,255,0.4)" : "none" }}>{t.pts}</span>
+              {[t.gp, t.w, t.d, t.l].map((v, j) => <span key={j} style={{ color: INK_SUB, fontSize: 11, textAlign: "center" }}>{v}</span>)}
+              <span style={{ color: isConfirmed ? "#40C6A0" : isEliminated ? "#E0556E" : (isTop2 ? "#fff" : INK_SUB), fontSize: 12, fontWeight: 800, textAlign: "center", textShadow: isConfirmed ? "0 0 8px #40C6A0" : isEliminated ? "0 0 8px #E0556E" : "none" }}>{t.pts}</span>
             </div>
           </div>
         );
@@ -358,10 +364,12 @@ function FlipCard({ player }) {
           </div>
           {player.teams.slice().sort((a, b) => b.p - a.p).map((t, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: i < player.teams.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <span style={{ fontSize: 16 }}>{t.f}</span>
-                <span style={{ color: teamColor(t.n) || (t.p > 0 ? "#fff" : INK_SUB), fontSize: 13, fontWeight: t.p > 0 ? 600 : 400,
-                  textShadow: teamColor(t.n) ? `0 0 8px ${teamColor(t.n)}88` : "none" }}>{t.n}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>{t.f}</span>
+                <span style={{ color: CONFIRMED.has(t.n) ? "#40C6A0" : ELIMINATED.has(t.n) ? "#E0556E" : (t.p > 0 ? "#fff" : INK_SUB), fontSize: 13, fontWeight: t.p > 0 ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  textShadow: CONFIRMED.has(t.n) ? "0 0 10px #40C6A0" : ELIMINATED.has(t.n) ? "0 0 10px #E0556E" : "none" }}>{t.n}</span>
+                {CONFIRMED.has(t.n) && <span style={{ background: "#40C6A0", color: "#0E1A2E", fontSize: 7, fontWeight: 900, padding: "1px 4px", borderRadius: 3, flexShrink: 0, boxShadow: "0 0 6px #40C6A0" }}>✓</span>}
+                {ELIMINATED.has(t.n) && <span style={{ background: "#E0556E", color: "#fff", fontSize: 7, fontWeight: 900, padding: "1px 4px", borderRadius: 3, flexShrink: 0, boxShadow: "0 0 6px #E0556E" }}>✗</span>}
               </div>
               <span style={{ color: t.p >= 3 ? col : t.p > 0 ? "#B6C2D6" : INK_SUB, fontSize: 13, fontWeight: 700, textShadow: t.p >= 3 ? `0 0 8px ${col}` : "none" }}>
                 {t.p > 0 ? `+${t.p}` : "—"}
