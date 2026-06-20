@@ -316,7 +316,7 @@ function FlipCard({ player }) {
             <p style={{ color: col, fontSize: 13, fontWeight: 800, margin: 0, textShadow: `0 0 6px ${col}` }}>{player.name}'s Squad</p>
             <p style={{ color: GOLD, fontSize: 13, fontWeight: 800, margin: 0 }}>{total} pts</p>
           </div>
-          {player.teams.map((t, i) => (
+          {player.teams.slice().sort((a, b) => b.p - a.p).map((t, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0", borderBottom: i < player.teams.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <span style={{ fontSize: 16 }}>{t.f}</span>
