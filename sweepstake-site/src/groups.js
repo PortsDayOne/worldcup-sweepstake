@@ -60,9 +60,9 @@ export const GROUPS = [
     { name: "Egypt",        gp:1, w:0, d:1, l:0, gf:1,  ga:1, pts:1 },
   ]},
   { name: "Group H", teams: [
-    { name: "Spain",        gp:1, w:0, d:1, l:0, gf:0,  ga:0, pts:1 },
+    { name: "Spain",        gp:2, w:1, d:1, l:0, gf:4,  ga:0, pts:4 },
     { name: "Uruguay",      gp:1, w:0, d:1, l:0, gf:1,  ga:1, pts:1 },
-    { name: "Saudi Arabia", gp:1, w:0, d:1, l:0, gf:1,  ga:1, pts:1 },
+    { name: "Saudi Arabia", gp:2, w:0, d:1, l:1, gf:1,  ga:5, pts:1 },
     { name: "Cape Verde",   gp:1, w:0, d:1, l:0, gf:0,  ga:0, pts:1 },
   ]},
   { name: "Group I", teams: [
