@@ -43,14 +43,22 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 }
 
 const FIXTURES = [
-  { date: "Sun 21 Jun", time: "9pm BST",  home: "Belgium",      away: "Iran",        group: "G" },
-  { date: "Mon 22 Jun", time: "12am BST", home: "Spain",        away: "Saudi Arabia",group: "H" },
-  { date: "Mon 22 Jun", time: "2am BST",  home: "Uruguay",      away: "Cape Verde",  group: "H" },
-  { date: "Mon 22 Jun", time: "2am BST",  home: "New Zealand",  away: "Egypt",       group: "G" },
-  { date: "Mon 22 Jun", time: "6pm BST",  home: "Argentina",    away: "Austria",     group: "J" },
-  { date: "Mon 22 Jun", time: "10pm BST", home: "France",       away: "Iraq",        group: "I" },
-  { date: "Tue 23 Jun", time: "1am BST",  home: "Norway",       away: "Senegal",     group: "I" },
-  { date: "Tue 23 Jun", time: "4am BST",  home: "Jordan",       away: "Algeria",     group: "J" },
+  { date: "Sun 21 Jun", time: "9pm BST",  home: "Belgium",     away: "Iran",        group: "G" },
+  { date: "Mon 22 Jun", time: "12am BST", home: "Uruguay",     away: "Cape Verde",  group: "H" },
+  { date: "Mon 22 Jun", time: "2am BST",  home: "New Zealand", away: "Egypt",       group: "G" },
+  { date: "Mon 22 Jun", time: "6pm BST",  home: "Argentina",   away: "Austria",     group: "J" },
+  { date: "Mon 22 Jun", time: "10pm BST", home: "France",      away: "Iraq",        group: "I" },
+  { date: "Tue 23 Jun", time: "1am BST",  home: "Norway",      away: "Senegal",     group: "I" },
+  { date: "Tue 23 Jun", time: "4am BST",  home: "Jordan",      away: "Algeria",     group: "J" },
+  { date: "Tue 23 Jun", time: "6pm BST",  home: "Portugal",    away: "Uzbekistan",  group: "K" },
+  { date: "Tue 23 Jun", time: "9pm BST",  home: "England",     away: "Ghana",       group: "L" },
+  { date: "Wed 24 Jun", time: "12am BST", home: "Panama",      away: "Croatia",     group: "L" },
+  { date: "Wed 24 Jun", time: "3am BST",  home: "Colombia",    away: "DR Congo",    group: "K" },
+  { date: "Wed 24 Jun", time: "8pm BST",  home: "Switzerland", away: "Canada",      group: "B" },
+  { date: "Wed 24 Jun", time: "11pm BST", home: "Scotland",    away: "Brazil",      group: "C" },
+  { date: "Wed 24 Jun", time: "11pm BST", home: "Morocco",     away: "Haiti",       group: "C" },
+  { date: "Thu 25 Jun", time: "2am BST",  home: "Czechia",     away: "Mexico",      group: "A" },
+  { date: "Thu 25 Jun", time: "9pm BST",  home: "Ecuador",     away: "Germany",     group: "E" },
 ];
 
 function getForm(name) {
