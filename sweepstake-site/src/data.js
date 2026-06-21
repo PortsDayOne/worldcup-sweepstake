@@ -9,9 +9,9 @@ export const LAST_UPDATED = "21 June 2026 · after 40 matches";
 // Keep them in any order — the site sorts by points automatically.
 export const PLAYERS = [
   { name: "Lottie",  color: "#40C6A0", total: 23, played: 9,  teams: "Mexico (6), Morocco (4), Argentina (3), England (3), Netherlands (4), Paraguay (3)" },
-  { name: "Tom",     color: "#F0C446", total: 18, played: 10, teams: "USA (6), Brazil (4), Australia (3), Ivory Coast (3), Saudi Arabia (1), Bosnia (1)" },
+  { name: "Tom",     color: "#F0C446", total: 21, played: 12, teams: "USA (6), Brazil (7), Ivory Coast (3), Australia (3), Saudi Arabia (1), Bosnia (1)" },
   { name: "Joanne",  color: "#E0556E", total: 15, played: 10, teams: "Canada (4), Germany (6), Colombia (3), South Africa (1), Curaçao (1), Tunisia (0)" },
-  { name: "Sam",     color: "#FF9F43", total: 11, played: 7,  teams: "France (3), Norway (3), Sweden (3), Spain (1), Uruguay (1), Uzbekistan (0)" },
+  { name: "Sam",     color: "#FF9F43", total: 14, played: 8,  teams: "Spain (4), France (3), Norway (3), Sweden (3), Uruguay (1), Uzbekistan (0)" },
   { name: "Joe",     color: "#5896FF", total: 11, played: 8,  teams: "South Korea (3), Japan (4), Belgium (1), Iran (1), DR Congo (1), Czechia (1)" },
   { name: "Darrell", color: "#9DB2BF", total: 9,  played: 9,  teams: "Ghana (3), Switzerland (4), Portugal (1), Ecuador (1), Haiti (0), Panama (0)" },
   { name: "Matt",    color: "#C77DFF", total: 7,  played: 7,  teams: "Scotland (3), Austria (3), Egypt (1), Senegal (0), Iraq (0), Algeria (0)" },
@@ -30,14 +30,16 @@ export const PROGRESSION = [
   { day: "16 Jun",    Tom: 12, Lottie: 8, Joe: 6, Joanne: 4, Matt: 7, Sam: 11, Karina: 3, Darrell: 1 },
   { day: "17 Jun",    Tom: 12, Lottie: 11, Joe: 7, Joanne: 7, Matt: 7, Sam: 11, Karina: 3, Darrell: 5 },
   { day: "18 Jun",    Tom: 12, Lottie: 14, Joe: 8, Joanne: 11, Matt: 7, Sam: 11, Karina: 3, Darrell: 8 },
-  { day: "19 Jun",    Tom: 18, Lottie: 20, Joe: 8, Joanne: 11, Matt: 7, Sam: 11, Karina: 3, Darrell: 8 },
-  { day: "20 Jun",    Tom: 18, Lottie: 23, Joe: 11, Joanne: 15, Matt: 7, Sam: 11, Karina: 3, Darrell: 9 },
+  { day: "19 Jun",    Tom: 18, Lottie: 20, Joe: 8,  Joanne: 11, Matt: 7, Sam: 11, Karina: 3, Darrell: 8 },
+  { day: "20 Jun",    Tom: 21, Lottie: 23, Joe: 8,  Joanne: 14, Matt: 7, Sam: 11, Karina: 3, Darrell: 8 },
+  { day: "21 Jun",    Tom: 21, Lottie: 23, Joe: 11, Joanne: 15, Matt: 7, Sam: 11, Karina: 3, Darrell: 9 },
+  { day: "21 Jun pm", Tom: 21, Lottie: 23, Joe: 11, Joanne: 15, Matt: 7, Sam: 14, Karina: 3, Darrell: 9 },
 ];
 
 // Most recent results to show as score cards.
 export const RECENT = [
   { a: "Germany",     ga: 2, gb: 1, b: "Ivory Coast" },
-  { a: "Netherlands", ga: 5, gb: 1, b: "Sweden" },
+  { a: "Spain",       ga: 4, gb: 0, b: "Saudi Arabia" },
   { a: "Japan",       ga: 4, gb: 0, b: "Tunisia" },
   { a: "Ecuador",     ga: 0, gb: 0, b: "Curaçao" },
 ];
