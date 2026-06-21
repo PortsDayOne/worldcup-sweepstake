@@ -3,7 +3,7 @@
 //  After editing, save, commit & push to GitHub. The site updates itself.
 // =====================================================================
 
-export const LAST_UPDATED = "21 June 2026 · after 39 matches";
+export const LAST_UPDATED = "21 June 2026 · after 40 matches";
 
 // Each player: name, colour, total points, games played, and their teams.
 // Keep them in any order — the site sorts by points automatically.
