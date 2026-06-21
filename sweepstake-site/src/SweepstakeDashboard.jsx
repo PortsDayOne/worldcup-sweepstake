@@ -10,9 +10,9 @@ const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
 
 // Mathematically confirmed through to knockout round
-const CONFIRMED = new Set(["Mexico", "USA"]);
+const CONFIRMED = new Set(["Mexico", "USA", "Brazil", "Germany", "Netherlands"]);
 // Mathematically eliminated from knockout round  
-const ELIMINATED = new Set(["Haiti", "Türkiye", "Turkiye"]);
+const ELIMINATED = new Set(["Haiti", "Türkiye", "Turkiye", "Tunisia"]);
 
 // Returns highlight colour for a team name, or null
 function teamColor(name) {
@@ -43,14 +43,14 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 }
 
 const FIXTURES = [
-  { date: "Sat 20 Jun", time: "9pm BST",  home: "Germany",     away: "Ivory Coast", group: "E" },
-  { date: "Sun 21 Jun", time: "12am BST", home: "Ecuador",     away: "Curacao",     group: "E" },
-  { date: "Sun 21 Jun", time: "12am BST", home: "Netherlands", away: "Sweden",      group: "F" },
-  { date: "Sun 21 Jun", time: "3am BST",  home: "Tunisia",     away: "Japan",       group: "F" },
-  { date: "Sun 21 Jun", time: "9pm BST",  home: "Belgium",     away: "Egypt",       group: "G" },
-  { date: "Mon 22 Jun", time: "12am BST", home: "Iran",        away: "New Zealand", group: "G" },
-  { date: "Mon 22 Jun", time: "12am BST", home: "Spain",       away: "Saudi Arabia",group: "H" },
-  { date: "Mon 22 Jun", time: "3am BST",  home: "Uruguay",     away: "Cape Verde",  group: "H" },
+  { date: "Sun 21 Jun", time: "9pm BST",  home: "Belgium",      away: "Iran",        group: "G" },
+  { date: "Mon 22 Jun", time: "12am BST", home: "Spain",        away: "Saudi Arabia",group: "H" },
+  { date: "Mon 22 Jun", time: "2am BST",  home: "Uruguay",      away: "Cape Verde",  group: "H" },
+  { date: "Mon 22 Jun", time: "2am BST",  home: "New Zealand",  away: "Egypt",       group: "G" },
+  { date: "Mon 22 Jun", time: "6pm BST",  home: "Argentina",    away: "Austria",     group: "J" },
+  { date: "Mon 22 Jun", time: "10pm BST", home: "France",       away: "Iraq",        group: "I" },
+  { date: "Tue 23 Jun", time: "1am BST",  home: "Norway",       away: "Senegal",     group: "I" },
+  { date: "Tue 23 Jun", time: "4am BST",  home: "Jordan",       away: "Algeria",     group: "J" },
 ];
 
 function getForm(name) {
@@ -308,12 +308,12 @@ function FixturesTab() {
 
 // Squad data: each player's 6 teams with flags (emoji) and current points
 const SQUAD_DATA = [
-  { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:6 },{ f:"🇲🇦", n:"Morocco", p:4 },{ f:"🇦🇷", n:"Argentina", p:3 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:3 },{ f:"🇳🇱", n:"Netherlands", p:1 },{ f:"🇵🇾", n:"Paraguay", p:3 }] },
-  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:4 },{ f:"🇦🇺", n:"Australia", p:3 },{ f:"🇨🇮", n:"Ivory Coast", p:3 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:1 }] },
+  { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:6 },{ f:"🇳🇱", n:"Netherlands", p:4 },{ f:"🇲🇦", n:"Morocco", p:4 },{ f:"🇦🇷", n:"Argentina", p:3 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:3 },{ f:"🇵🇾", n:"Paraguay", p:3 }] },
+  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:7 },{ f:"🇦🇺", n:"Australia", p:3 },{ f:"🇨🇮", n:"Ivory Coast", p:3 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:1 }] },
+  { name: "Joanne",  teams: [{ f:"🇩🇪", n:"Germany", p:6 },{ f:"🇨🇦", n:"Canada", p:4 },{ f:"🇨🇴", n:"Colombia", p:3 },{ f:"🇿🇦", n:"South Africa", p:1 },{ f:"🇨🇼", n:"Curaçao", p:1 },{ f:"🇹🇳", n:"Tunisia", p:0 }] },
   { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:3 },{ f:"🇳🇴", n:"Norway", p:3 },{ f:"🇸🇪", n:"Sweden", p:3 },{ f:"🇪🇸", n:"Spain", p:1 },{ f:"🇺🇾", n:"Uruguay", p:1 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
-  { name: "Joanne",  teams: [{ f:"🇨🇦", n:"Canada", p:4 },{ f:"🇩🇪", n:"Germany", p:3 },{ f:"🇨🇴", n:"Colombia", p:3 },{ f:"🇿🇦", n:"South Africa", p:1 },{ f:"🇨🇼", n:"Curaçao", p:0 },{ f:"🇹🇳", n:"Tunisia", p:0 }] },
-  { name: "Joe",     teams: [{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:1 },{ f:"🇯🇵", n:"Japan", p:1 },{ f:"🇮🇷", n:"Iran", p:1 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
-  { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:3 },{ f:"🇨🇭", n:"Switzerland", p:4 },{ f:"🇵🇹", n:"Portugal", p:1 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇪🇨", n:"Ecuador", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
+  { name: "Joe",     teams: [{ f:"🇯🇵", n:"Japan", p:4 },{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:1 },{ f:"🇮🇷", n:"Iran", p:1 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
+  { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:3 },{ f:"🇨🇭", n:"Switzerland", p:4 },{ f:"🇵🇹", n:"Portugal", p:1 },{ f:"🇪🇨", n:"Ecuador", p:1 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
   { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:1 },{ f:"🇸🇳", n:"Senegal", p:0 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:0 }] },
   { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:1 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:0 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:0 }] },
 ];
