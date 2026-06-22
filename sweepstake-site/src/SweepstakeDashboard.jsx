@@ -9,10 +9,25 @@ const GOLD = "#F0C446";
 const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
 
-// Mathematically confirmed through to knockout round
-const CONFIRMED = new Set(["Germany", "Mexico"]);
-// Mathematically eliminated from knockout round  
-const ELIMINATED = new Set(["Haiti", "Tunisia"]);
+// Auto-derived from current standings — never hand-maintained.
+// CONFIRMED = clinched a top-2 group place (guaranteed knockout, ignoring any favourable
+//   head-to-head among rivals, so it only ever flags a team when it is mathematically certain).
+// ELIMINATED = cannot mathematically finish in the top 3 (locked into last place).
+function deriveStatus() {
+  const confirmed = new Set();
+  const eliminated = new Set();
+  GROUPS.forEach(g => {
+    const ts = g.teams.map(t => ({ name: t.name, pts: t.pts, max: t.pts + 3 * Math.max(0, 3 - t.gp) }));
+    ts.forEach(t => {
+      const canReachT = ts.filter(r => r.name !== t.name && r.max >= t.pts).length;
+      if (canReachT <= 1) confirmed.add(t.name);
+      const alreadyAbove = ts.filter(r => r.name !== t.name && r.pts > t.max).length;
+      if (alreadyAbove >= 3) eliminated.add(t.name);
+    });
+  });
+  return { confirmed, eliminated };
+}
+const { confirmed: CONFIRMED, eliminated: ELIMINATED } = deriveStatus();
 
 // Some team names differ between groups.js (display) and OWNERS (squad keys).
 // This map lets owner lookups work regardless of which spelling is used.
@@ -25,6 +40,33 @@ const TEAM_ALIASES = {
 };
 function ownerOf(team) {
   return OWNERS[team] || OWNERS[TEAM_ALIASES[team]] || null;
+}
+
+// Map a team property keyed by BOTH the groups.js spelling and the OWNERS spelling,
+// so owner-based lookups survive the name mismatches.
+function teamMap(valueFn) {
+  const m = {};
+  GROUPS.forEach(g => g.teams.forEach(t => {
+    const v = valueFn(t);
+    m[t.name] = v;
+    if (t.name in TEAM_ALIASES) m[TEAM_ALIASES[t.name]] = v;
+  }));
+  return m;
+}
+
+// #2 — data integrity: each player's stated total must equal the sum of their teams' group points.
+function dataIntegrityIssues() {
+  const pts = teamMap(t => t.pts);
+  const issues = [];
+  PLAYERS.forEach(p => {
+    const owned = Object.keys(OWNERS).filter(t => OWNERS[t] === p.name);
+    const missing = owned.filter(t => pts[t] === undefined);
+    if (missing.length) { issues.push(`${p.name}: unmatched team name → ${missing.join(", ")}`); return; }
+    if (owned.length !== 6) issues.push(`${p.name}: owns ${owned.length} teams (expected 6)`);
+    const sum = owned.reduce((s, t) => s + pts[t], 0);
+    if (sum !== p.total) issues.push(`${p.name}: total ${p.total} ≠ team sum ${sum}`);
+  });
+  return issues;
 }
 
 // Returns highlight colour for a team name, or null
@@ -424,6 +466,9 @@ export default function SweepstakeDashboard() {
   const [view, setView] = useState("standings");
   const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
   const leader = ranked[0];
+  const integrityIssues = dataIntegrityIssues();
+  const remaining = teamMap(t => Math.max(0, 3 - t.gp));
+  const ptsLeftFor = (name) => Object.keys(OWNERS).filter(t => OWNERS[t] === name).reduce((s, t) => s + (remaining[t] || 0), 0) * 3;
 
   const tabs = [
     { id: "standings",   label: "Standings" },
@@ -437,6 +482,15 @@ export default function SweepstakeDashboard() {
   return (
     <div style={{ background: `linear-gradient(160deg, ${NAVY} 0%, ${NAVY2} 100%)`, minHeight: "100vh", fontFamily: "'Inter','Helvetica Neue',sans-serif", padding: "20px 16px", display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: 760 }}>
+
+        {integrityIssues.length > 0 && (
+          <div style={{ background: "rgba(240,196,70,0.12)", border: "1px solid rgba(240,196,70,0.5)", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
+            <p style={{ color: GOLD, fontSize: 12, fontWeight: 800, margin: "0 0 4px", letterSpacing: 0.5 }}>⚠ Data check — standings don't reconcile</p>
+            {integrityIssues.map((msg, i) => (
+              <p key={i} style={{ color: "#E8D9A8", fontSize: 11.5, margin: "2px 0", lineHeight: 1.5 }}>{msg}</p>
+            ))}
+          </div>
+        )}
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
@@ -513,14 +567,14 @@ export default function SweepstakeDashboard() {
               <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 12px", textShadow: `0 0 8px ${GREEN}88` }}>Form Guide</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { name: "Lottie", emoji: "🔥", headline: "On fire", text: "The only player with five wins from six teams, Lottie has quietly assembled the most balanced squad in the draw. Morocco and Paraguay both pulled off surprise wins — she's benefiting from depth others don't have." },
-                  { name: "Tom",    emoji: "⚡", headline: "Powerhouse", text: "Tom has the tournament's joint-best team in USA and a Brazil side finding their rhythm under Ancelotti. The concern is Bosnia and Saudi Arabia are unlikely to score many more points — he needs his big guns to go deep." },
-                  { name: "Sam",    emoji: "🎯", headline: "Flattering to deceive?", text: "France and Norway are legitimate title contenders on paper, but Sam's line has gone flat since June 15. None of his remaining teams have played yet — big games incoming that could shoot him into contention or leave him stranded." },
-                  { name: "Joanne", emoji: "📈", headline: "The comeback", text: "Joanne was bottom at the start, but three clean wins from Germany, Colombia and Canada have transformed her campaign. She arguably has the most exciting group-stage teams still with games to play." },
-                  { name: "Joe",    emoji: "🤞", headline: "Steady but needs a break", text: "Seven teams have now played and Joe has accumulated points from six of them — the most consistent converter in the sweepstake. The problem is none of his teams have won a game outright yet. He's living on draws." },
-                  { name: "Darrell",emoji: "🎲", headline: "Swings and roundabouts", text: "Ghana's surprise win and Switzerland's 4-1 demolition of Bosnia showed Darrell has some punchers in his squad. But Haiti and Panama are already eliminated — his ceiling depends almost entirely on how far Portugal can go." },
-                  { name: "Matt",   emoji: "😬", headline: "Painful viewing", text: "Matt's Scotland lost to Morocco despite winning their opener, and Algeria, Senegal and Iraq all lost their first games. Austria winning was a rare bright spot. He urgently needs France, Norway or Argentina to crash out." },
-                  { name: "Karina", emoji: "💀", headline: "Miracle needed", text: "Türkiye eliminated, Jordan eliminated, Croatia and Qatar both in dire shape — Karina's squad is the worst performing in the tournament by a distance. Cape Verde holding Spain is the only joy so far, and even that's just a draw." },
+                  { name: "Lottie", emoji: "🔥", headline: "Runaway leader", text: "Lottie is out front on 26 and pulling clear. Mexico have already won Group A, and Argentina joined them in the last 32 after Messi's record-breaking brace sank Austria. With Morocco and the Netherlands both on four and England and Paraguay still alive, she has a depth nobody else can match." },
+                  { name: "Tom",    emoji: "⚡", headline: "Big guns, light support", text: "Second on 18, carried by group winners USA and a Brazil side that found its feet with a 3-0 win over Haiti. The worry is the bottom of his squad: Saudi Arabia and Bosnia have a point each and look unlikely to add much. His ceiling rests on USA, Brazil and Ivory Coast going deep." },
+                  { name: "Sam",    emoji: "🎯", headline: "Coming to life", text: "The flat spell is over. France and Norway both opened with wins to lift Sam to 15, and crucially he still has games in hand. Spain's 4-0 thrashing of Saudi Arabia anchors him. If his contenders deliver he could climb fast; if they stall, he's stuck in the pack." },
+                  { name: "Joanne", emoji: "📈", headline: "The climb continues", text: "From bottom of the pile to right in the mix on 15. Germany are through after racking up nine goals, and Canada and Colombia give her a strong spine. South Africa, Curaçao and Tunisia are the dead weight, but with Germany flying she's level with Sam and breathing down Tom's neck." },
+                  { name: "Joe",    emoji: "🤞", headline: "Quietly effective", text: "Scrap the 'living on draws' tag — Joe has real wins now, with Japan hammering Tunisia 4-0 and South Korea seeing off Czechia. Add the draws from Belgium, Iran and DR Congo and he's a tidy 13, scoring points from all six of his teams. No superstar run yet, but the most reliable accumulator in the field." },
+                  { name: "Darrell",emoji: "🎲", headline: "Pinned to Portugal", text: "Switzerland's 4-1 demolition of Bosnia and Ghana's win over Panama show Darrell has firepower in spots. But Haiti and Panama are both out, and Ecuador and Portugal are clinging on with a point each. On 9, his hopes ride almost entirely on how far Switzerland and Portugal can go." },
+                  { name: "Matt",   emoji: "😬", headline: "Still painful", text: "The tough watch continues. Egypt are his standout on four, and Scotland and Austria both have three — but Austria were just swept aside by Messi's Argentina, and Senegal, Iraq and Algeria are all still pointless. On 10 and needing the big names in his rivals' squads to slip up." },
+                  { name: "Karina", emoji: "💀", headline: "Miracle needed", text: "Still the toughest hand by a distance. Türkiye are eliminated, and Croatia, Jordan and Qatar are all struggling badly. Cape Verde are the lone bright spot, grinding out two draws — including a 2-2 with Uruguay — for two points. On 4, Karina needs results to start falling her way, and fast." },
                 ].map((p, i) => {
                   const player = PLAYERS.find(pl => pl.name === p.name);
                   const col = player?.color || "#666";
@@ -557,6 +611,13 @@ export default function SweepstakeDashboard() {
                         <p style={{ color: INK_SUB, fontSize: 11.5, margin: 0, lineHeight: 1.6, whiteSpace: "normal", wordBreak: "break-word" }}>
                       <TeamsText text={p.teams} baseColor={INK_SUB} />
                     </p>
+                        <p style={{ color: GREEN, fontSize: 10.5, margin: "5px 0 0", fontWeight: 600, opacity: 0.9 }}>
+                          {i === 0
+                            ? `Leads by ${p.total - ranked[1].total} · ${ptsLeftFor(p.name)} pts still to play`
+                            : (ranked[i - 1].total - p.total === 0
+                                ? `Level with ${ranked[i - 1].name} · ${ptsLeftFor(p.name)} pts still to play`
+                                : `${ranked[i - 1].total - p.total} behind ${ranked[i - 1].name} · ${ptsLeftFor(p.name)} pts still to play`)}
+                        </p>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
                         <PtsBadge value={p.total} color={p.color} />
