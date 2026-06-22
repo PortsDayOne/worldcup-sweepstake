@@ -10,9 +10,9 @@ const GREEN = "#40C6A0";
 const INK_SUB = "#8694AC";
 
 // Mathematically confirmed through to knockout round
-const CONFIRMED = new Set(["Mexico", "USA", "Brazil", "Germany", "Netherlands", "Spain", "Egypt"]);
+const CONFIRMED = new Set(["Germany", "Mexico"]);
 // Mathematically eliminated from knockout round  
-const ELIMINATED = new Set(["Haiti", "Türkiye", "Turkiye", "Tunisia"]);
+const ELIMINATED = new Set(["Haiti", "Tunisia"]);
 
 // Returns highlight colour for a team name, or null
 function teamColor(name) {
@@ -43,22 +43,22 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 }
 
 const FIXTURES = [
-  { date: "Sun 21 Jun", time: "9pm BST",  home: "Belgium",     away: "Iran",        group: "G" },
-  { date: "Mon 22 Jun", time: "12am BST", home: "Uruguay",     away: "Cape Verde",  group: "H" },
-  { date: "Mon 22 Jun", time: "2am BST",  home: "New Zealand", away: "Egypt",       group: "G" },
-  { date: "Mon 22 Jun", time: "6pm BST",  home: "Argentina",   away: "Austria",     group: "J" },
-  { date: "Mon 22 Jun", time: "10pm BST", home: "France",      away: "Iraq",        group: "I" },
-  { date: "Tue 23 Jun", time: "1am BST",  home: "Norway",      away: "Senegal",     group: "I" },
-  { date: "Tue 23 Jun", time: "4am BST",  home: "Jordan",      away: "Algeria",     group: "J" },
-  { date: "Tue 23 Jun", time: "6pm BST",  home: "Portugal",    away: "Uzbekistan",  group: "K" },
-  { date: "Tue 23 Jun", time: "9pm BST",  home: "England",     away: "Ghana",       group: "L" },
-  { date: "Wed 24 Jun", time: "12am BST", home: "Panama",      away: "Croatia",     group: "L" },
-  { date: "Wed 24 Jun", time: "3am BST",  home: "Colombia",    away: "DR Congo",    group: "K" },
-  { date: "Wed 24 Jun", time: "8pm BST",  home: "Switzerland", away: "Canada",      group: "B" },
-  { date: "Wed 24 Jun", time: "11pm BST", home: "Scotland",    away: "Brazil",      group: "C" },
-  { date: "Wed 24 Jun", time: "11pm BST", home: "Morocco",     away: "Haiti",       group: "C" },
-  { date: "Thu 25 Jun", time: "2am BST",  home: "Czechia",     away: "Mexico",      group: "A" },
-  { date: "Thu 25 Jun", time: "9pm BST",  home: "Ecuador",     away: "Germany",     group: "E" },
+  { date: "Mon 22 Jun", time: "6pm bst BST", home: "Argentina", away: "Austria", group: "J" },
+  { date: "Mon 22 Jun", time: "10pm bst BST", home: "France", away: "Iraq", group: "I" },
+  { date: "Tue 23 Jun", time: "1am bst BST", home: "Norway", away: "Senegal", group: "I" },
+  { date: "Tue 23 Jun", time: "4am bst BST", home: "Jordan", away: "Algeria", group: "J" },
+  { date: "Tue 23 Jun", time: "6pm bst BST", home: "Portugal", away: "Uzbekistan", group: "K" },
+  { date: "Tue 23 Jun", time: "9pm bst BST", home: "England", away: "Ghana", group: "L" },
+  { date: "Wed 24 Jun", time: "12am bst BST", home: "Panama", away: "Croatia", group: "L" },
+  { date: "Wed 24 Jun", time: "3am bst BST", home: "Colombia", away: "Congo DR", group: "K" },
+  { date: "Wed 24 Jun", time: "8pm bst BST", home: "Switzerland", away: "Canada", group: "B" },
+  { date: "Wed 24 Jun", time: "8pm bst BST", home: "Bosnia-Herzegovina", away: "Qatar", group: "B" },
+  { date: "Wed 24 Jun", time: "11pm bst BST", home: "Morocco", away: "Haiti", group: "C" },
+  { date: "Wed 24 Jun", time: "11pm bst BST", home: "Scotland", away: "Brazil", group: "C" },
+  { date: "Thu 25 Jun", time: "2am bst BST", home: "Czechia", away: "Mexico", group: "A" },
+  { date: "Thu 25 Jun", time: "2am bst BST", home: "South Africa", away: "South Korea", group: "A" },
+  { date: "Thu 25 Jun", time: "9pm bst BST", home: "Ecuador", away: "Germany", group: "E" },
+  { date: "Thu 25 Jun", time: "9pm bst BST", home: "Curaçao", away: "Ivory Coast", group: "E" }
 ];
 
 function getForm(name) {
