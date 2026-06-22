@@ -106,8 +106,8 @@ export const GROUPS = [
     { name: "Iraq", gp:1, w:0, d:0, l:1, gf:1, ga:4, pts:0 }
   ]},
   { name: "Group J", teams: [
-    { name: "Argentina", gp:1, w:1, d:0, l:0, gf:3, ga:0, pts:3 },
-    { name: "Austria", gp:1, w:1, d:0, l:0, gf:3, ga:1, pts:3 },
+    { name: "Argentina", gp:2, w:2, d:0, l:0, gf:5, ga:0, pts:6 },
+    { name: "Austria", gp:2, w:1, d:0, l:1, gf:3, ga:3, pts:3 },
     { name: "Jordan", gp:1, w:0, d:0, l:1, gf:1, ga:3, pts:0 },
     { name: "Algeria", gp:1, w:0, d:0, l:1, gf:0, ga:3, pts:0 }
   ]},
