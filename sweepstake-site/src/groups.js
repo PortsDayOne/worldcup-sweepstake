@@ -56,67 +56,67 @@ export const GROUPS = [
     { name: "South Korea", gp:2, w:1, d:0, l:1, gf:2, ga:2, pts:3 },
     { name: "Czechia", gp:2, w:0, d:1, l:1, gf:2, ga:3, pts:1 },
     { name: "South Africa", gp:2, w:0, d:1, l:1, gf:1, ga:3, pts:1 }
-  ]}
+  ]},
   { name: "Group B", teams: [
     { name: "Canada", gp:2, w:1, d:1, l:0, gf:7, ga:1, pts:4 },
     { name: "Switzerland", gp:2, w:1, d:1, l:0, gf:5, ga:2, pts:4 },
     { name: "Bosnia-Herzegovina", gp:2, w:0, d:1, l:1, gf:2, ga:5, pts:1 },
     { name: "Qatar", gp:2, w:0, d:1, l:1, gf:1, ga:7, pts:1 }
-  ]}
+  ]},
   { name: "Group C", teams: [
     { name: "Brazil", gp:2, w:1, d:1, l:0, gf:4, ga:1, pts:4 },
     { name: "Morocco", gp:2, w:1, d:1, l:0, gf:2, ga:1, pts:4 },
     { name: "Scotland", gp:2, w:1, d:0, l:1, gf:1, ga:1, pts:3 },
     { name: "Haiti", gp:2, w:0, d:0, l:2, gf:0, ga:4, pts:0 }
-  ]}
+  ]},
   { name: "Group D", teams: [
     { name: "USA", gp:2, w:2, d:0, l:0, gf:6, ga:1, pts:6 },
     { name: "Australia", gp:2, w:1, d:0, l:1, gf:2, ga:2, pts:3 },
     { name: "Paraguay", gp:2, w:1, d:0, l:1, gf:2, ga:4, pts:3 },
     { name: "Turkey", gp:2, w:0, d:0, l:2, gf:0, ga:3, pts:0 }
-  ]}
+  ]},
   { name: "Group E", teams: [
     { name: "Germany", gp:2, w:2, d:0, l:0, gf:9, ga:2, pts:6 },
     { name: "Ivory Coast", gp:2, w:1, d:0, l:1, gf:2, ga:2, pts:3 },
     { name: "Ecuador", gp:2, w:0, d:1, l:1, gf:0, ga:1, pts:1 },
     { name: "Curaçao", gp:2, w:0, d:1, l:1, gf:1, ga:7, pts:1 }
-  ]}
+  ]},
   { name: "Group F", teams: [
     { name: "Netherlands", gp:2, w:1, d:1, l:0, gf:7, ga:3, pts:4 },
     { name: "Japan", gp:2, w:1, d:1, l:0, gf:6, ga:2, pts:4 },
     { name: "Sweden", gp:2, w:1, d:0, l:1, gf:6, ga:6, pts:3 },
     { name: "Tunisia", gp:2, w:0, d:0, l:2, gf:1, ga:9, pts:0 }
-  ]}
+  ]},
   { name: "Group G", teams: [
     { name: "Egypt", gp:2, w:1, d:1, l:0, gf:4, ga:2, pts:4 },
     { name: "Iran", gp:2, w:0, d:2, l:0, gf:2, ga:2, pts:2 },
     { name: "Belgium", gp:2, w:0, d:2, l:0, gf:1, ga:1, pts:2 },
     { name: "New Zealand", gp:2, w:0, d:1, l:1, gf:3, ga:5, pts:1 }
-  ]}
+  ]},
   { name: "Group H", teams: [
     { name: "Spain", gp:2, w:1, d:1, l:0, gf:4, ga:0, pts:4 },
     { name: "Uruguay", gp:2, w:0, d:2, l:0, gf:3, ga:3, pts:2 },
     { name: "Cape Verde Islands", gp:2, w:0, d:2, l:0, gf:2, ga:2, pts:2 },
     { name: "Saudi Arabia", gp:2, w:0, d:1, l:1, gf:1, ga:5, pts:1 }
-  ]}
+  ]},
   { name: "Group I", teams: [
     { name: "Norway", gp:1, w:1, d:0, l:0, gf:4, ga:1, pts:3 },
     { name: "France", gp:1, w:1, d:0, l:0, gf:3, ga:1, pts:3 },
     { name: "Senegal", gp:1, w:0, d:0, l:1, gf:1, ga:3, pts:0 },
     { name: "Iraq", gp:1, w:0, d:0, l:1, gf:1, ga:4, pts:0 }
-  ]}
+  ]},
   { name: "Group J", teams: [
     { name: "Argentina", gp:1, w:1, d:0, l:0, gf:3, ga:0, pts:3 },
     { name: "Austria", gp:1, w:1, d:0, l:0, gf:3, ga:1, pts:3 },
     { name: "Jordan", gp:1, w:0, d:0, l:1, gf:1, ga:3, pts:0 },
     { name: "Algeria", gp:1, w:0, d:0, l:1, gf:0, ga:3, pts:0 }
-  ]}
+  ]},
   { name: "Group K", teams: [
     { name: "Colombia", gp:1, w:1, d:0, l:0, gf:3, ga:1, pts:3 },
     { name: "Congo DR", gp:1, w:0, d:1, l:0, gf:1, ga:1, pts:1 },
     { name: "Portugal", gp:1, w:0, d:1, l:0, gf:1, ga:1, pts:1 },
     { name: "Uzbekistan", gp:1, w:0, d:0, l:1, gf:1, ga:3, pts:0 }
-  ]}
+  ]},
   { name: "Group L", teams: [
     { name: "England", gp:1, w:1, d:0, l:0, gf:4, ga:2, pts:3 },
     { name: "Ghana", gp:1, w:1, d:0, l:0, gf:1, ga:0, pts:3 },
