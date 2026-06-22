@@ -2,8 +2,8 @@ name: Auto-update World Cup scores
 
 on:
   schedule:
-    - cron: '0 * * * *'   # every hour
-  workflow_dispatch:        # also lets you trigger manually from GitHub
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   update:
@@ -30,5 +30,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add sweepstake-site/src/data.js sweepstake-site/src/groups.js sweepstake-site/src/SweepstakeDashboard.jsx
-          git diff --staged --quiet || git commit -m "Auto-update scores $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git diff --staged --quiet || git commit -m "Auto-update scores"
           git push
