@@ -14,6 +14,19 @@ const CONFIRMED = new Set(["Germany", "Mexico"]);
 // Mathematically eliminated from knockout round  
 const ELIMINATED = new Set(["Haiti", "Tunisia"]);
 
+// Some team names differ between groups.js (display) and OWNERS (squad keys).
+// This map lets owner lookups work regardless of which spelling is used.
+const TEAM_ALIASES = {
+  "Bosnia-Herzegovina": "Bosnia",
+  "Turkey": "Turkiye",
+  "Türkiye": "Turkiye",
+  "Congo DR": "DR Congo",
+  "Cape Verde Islands": "Cape Verde",
+};
+function ownerOf(team) {
+  return OWNERS[team] || OWNERS[TEAM_ALIASES[team]] || null;
+}
+
 // Returns highlight colour for a team name, or null
 function teamColor(name) {
   if (CONFIRMED.has(name)) return "#40C6A0";
@@ -90,7 +103,7 @@ function Trophy() {
 }
 
 function OwnerBadge({ team }) {
-  const owner = OWNERS[team];
+  const owner = ownerOf(team);
   if (!owner) return null;
   const col = PLAYER_COLORS[owner] || "#666";
   return (
@@ -114,20 +127,55 @@ function PtsBadge({ value, color }) {
   );
 }
 
-function getQualifyingCounts() {
-  const counts = {};
-  PLAYERS.forEach(p => { counts[p.name] = { q: 0, total: 0 }; });
-  GROUPS.forEach(g => {
-    const sorted = [...g.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
-    sorted.forEach((t, i) => {
-      const owner = OWNERS[t.name];
-      if (owner && counts[owner]) { counts[owner].total++; if (i < 2) counts[owner].q++; }
-    });
+// ---------- Knockout projection helpers ----------
+// Official FIFA 2026 Round of 32 structure (Matches 73–88).
+// winner/runner slots resolve to a specific team from current standings.
+// third slots show the eligible group pool (FIFA Annex C assigns the exact
+// team only once all 12 groups finish).
+const KNOCKOUT_R32 = [
+  { m: 73, a: { t: "runner", g: "A" }, b: { t: "runner", g: "B" } },
+  { m: 74, a: { t: "winner", g: "E" }, b: { t: "third", pool: ["A","B","C","D","F"] } },
+  { m: 75, a: { t: "winner", g: "F" }, b: { t: "runner", g: "C" } },
+  { m: 76, a: { t: "winner", g: "C" }, b: { t: "runner", g: "F" } },
+  { m: 77, a: { t: "winner", g: "I" }, b: { t: "third", pool: ["C","D","F","G","H"] } },
+  { m: 78, a: { t: "runner", g: "E" }, b: { t: "runner", g: "I" } },
+  { m: 79, a: { t: "winner", g: "A" }, b: { t: "third", pool: ["C","E","F","H","I"] } },
+  { m: 80, a: { t: "winner", g: "L" }, b: { t: "third", pool: ["E","H","I","J","K"] } },
+  { m: 81, a: { t: "winner", g: "D" }, b: { t: "third", pool: ["B","E","F","I","J"] } },
+  { m: 82, a: { t: "winner", g: "G" }, b: { t: "third", pool: ["A","E","H","I","J"] } },
+  { m: 83, a: { t: "runner", g: "K" }, b: { t: "runner", g: "L" } },
+  { m: 84, a: { t: "winner", g: "H" }, b: { t: "runner", g: "J" } },
+  { m: 85, a: { t: "winner", g: "B" }, b: { t: "third", pool: ["E","F","G","I","J"] } },
+  { m: 86, a: { t: "winner", g: "J" }, b: { t: "runner", g: "H" } },
+  { m: 87, a: { t: "winner", g: "K" }, b: { t: "third", pool: ["D","E","I","J","L"] } },
+  { m: 88, a: { t: "runner", g: "D" }, b: { t: "runner", g: "G" } },
+];
+
+function koSort(teams) {
+  return [...teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+}
+function groupLetter(name) { return name.replace("Group ", ""); }
+function groupByLetter(letter) { return GROUPS.find(g => groupLetter(g.name) === letter); }
+
+function getRankedThirds() {
+  const thirds = GROUPS.map(g => {
+    const s = koSort(g.teams);
+    const t = s[2];
+    return { name: t.name, group: groupLetter(g.name), pts: t.pts, gd: t.gf - t.ga, gf: t.gf, gp: t.gp };
   });
-  return counts;
+  return [...thirds].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
 }
 
-// Animated tab panel wrapper
+function resolveSlot(slot) {
+  if (slot.t === "third") return null;
+  const g = groupByLetter(slot.g);
+  if (!g) return null;
+  const s = koSort(g.teams);
+  const team = slot.t === "winner" ? s[0] : s[1];
+  return { name: team.name, pos: (slot.t === "winner" ? "1" : "2") + slot.g };
+}
+
+// ---------- Tab panel wrapper ----------
 function TabPanel({ children }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { requestAnimationFrame(() => setVisible(true)); return () => setVisible(false); }, []);
@@ -136,6 +184,19 @@ function TabPanel({ children }) {
       {children}
     </div>
   );
+}
+
+function getQualifyingCounts() {
+  const counts = {};
+  PLAYERS.forEach(p => { counts[p.name] = { q: 0, total: 0 }; });
+  GROUPS.forEach(g => {
+    const sorted = [...g.teams].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+    sorted.forEach((t, i) => {
+      const owner = ownerOf(t.name);
+      if (owner && counts[owner]) { counts[owner].total++; if (i < 2) counts[owner].q++; }
+    });
+  });
+  return counts;
 }
 
 const RankTooltip = ({ active, payload }) => {
@@ -199,6 +260,118 @@ function GroupCard({ group }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ---------- Knockout projection tab ----------
+function KOTeam({ slot, qualGroups }) {
+  // Resolved winner/runner slot
+  if (slot.t !== "third") {
+    const r = resolveSlot(slot);
+    const owner = r ? ownerOf(r.name) : null;
+    const oCol = owner ? (PLAYER_COLORS[owner] || "#666") : null;
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <span style={{ fontSize: 9, fontWeight: 800, color: NAVY, background: slot.t === "winner" ? GOLD : "#5896FF", borderRadius: 4, padding: "1px 5px", flexShrink: 0, letterSpacing: 0.5 }}>{r ? r.pos : (slot.t === "winner" ? "1" : "2") + slot.g}</span>
+        <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r ? r.name : "—"}</span>
+        {owner && <OwnerBadge team={r.name} />}
+      </div>
+    );
+  }
+  // Third-place pool slot
+  const candidates = slot.pool.filter(g => qualGroups.has(g)).map(g => {
+    const grp = groupByLetter(g);
+    const third = grp ? koSort(grp.teams)[2] : null;
+    return third ? { group: g, name: third.name } : null;
+  }).filter(Boolean);
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+        <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", background: "rgba(255,255,255,0.12)", borderRadius: 4, padding: "1px 5px", flexShrink: 0, letterSpacing: 0.5 }}>3RD</span>
+        <span style={{ color: INK_SUB, fontSize: 11 }}>from {slot.pool.join(" · ")}</span>
+      </div>
+      {candidates.length > 0 ? (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {candidates.map(c => {
+            const owner = ownerOf(c.name);
+            const oCol = owner ? (PLAYER_COLORS[owner] || "#666") : "rgba(255,255,255,0.1)";
+            return (
+              <span key={c.group} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(64,198,160,0.10)", border: `1px solid ${GREEN}44`, borderRadius: 6, padding: "2px 6px" }}>
+                <span style={{ color: GREEN, fontSize: 10, fontWeight: 800 }}>{c.group}</span>
+                <span style={{ color: "#D2DAE6", fontSize: 11, fontWeight: 600 }}>{c.name}</span>
+                {owner && <span style={{ width: 6, height: 6, borderRadius: "50%", background: oCol, boxShadow: `0 0 4px ${oCol}` }} />}
+              </span>
+            );
+          })}
+        </div>
+      ) : (
+        <span style={{ color: INK_SUB, fontSize: 11, fontStyle: "italic" }}>candidates set once more games are played</span>
+      )}
+    </div>
+  );
+}
+
+function KnockoutTab() {
+  const rt = getRankedThirds();
+  const qualGroups = new Set(rt.slice(0, 8).map(t => t.group));
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 6px", lineHeight: 1.6 }}>
+        Live Round of 32 projection, as it stands. Group winners (gold) and runners-up (blue) are shown as the standings currently sit. Coloured dot = a sweepstake team.
+      </p>
+      <p style={{ color: INK_SUB, fontSize: 11, margin: "0 0 14px", lineHeight: 1.6, opacity: 0.85 }}>
+        Eight third-placed teams also qualify. FIFA only assigns the exact third-place opponent once all 12 groups finish, so those slots show the eligible group pool with the teams currently in the qualifying eight.
+      </p>
+
+      {KNOCKOUT_R32.map(match => (
+        <div key={match.m} style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "10px 14px", marginBottom: 9 }}>
+          <p style={{ color: GREEN, fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px", opacity: 0.7 }}>Match {match.m}</p>
+          <KOTeam slot={match.a} qualGroups={qualGroups} />
+          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "7px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
+            <span style={{ color: INK_SUB, fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>VS</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
+          </div>
+          <KOTeam slot={match.b} qualGroups={qualGroups} />
+        </div>
+      ))}
+
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "18px 0 6px", textShadow: `0 0 8px ${GREEN}88` }}>Best Third-Placed Teams (live)</p>
+      <p style={{ color: INK_SUB, fontSize: 11, margin: "0 0 10px" }}>Top 8 qualify. Ranked by points, then goal difference. Dotted line = current cut-off.</p>
+      <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "26px 30px 1fr 30px 34px", gap: 4, padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          {["#","GRP","TEAM","PTS","GD"].map(h => <span key={h} style={{ color: INK_SUB, fontSize: 9, fontWeight: 700, letterSpacing: 1, textAlign: h === "TEAM" ? "left" : "center" }}>{h}</span>)}
+        </div>
+        {rt.map((t, i) => {
+          const inZone = i < 8;
+          return (
+            <div key={t.group}>
+              {i === 8 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 14px", background: "rgba(255,255,255,0.03)" }}>
+                  <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
+                  <span style={{ color: INK_SUB, fontSize: 9, letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap" }}>Cut-off</span>
+                  <div style={{ flex: 1, borderTop: "1.5px dashed rgba(255,255,255,0.25)" }} />
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "26px 30px 1fr 30px 34px", gap: 4, padding: "9px 14px", borderBottom: i < rt.length - 1 && i !== 7 ? "1px solid rgba(255,255,255,0.04)" : "none", alignItems: "center", background: inZone ? "rgba(64,198,160,0.07)" : "transparent", borderLeft: inZone ? "3px solid #40C6A0" : "3px solid transparent", opacity: inZone ? 1 : 0.55 }}>
+                <span style={{ color: inZone ? GREEN : INK_SUB, fontSize: 11, fontWeight: 800, textAlign: "center" }}>{i + 1}</span>
+                <span style={{ color: inZone ? "#fff" : INK_SUB, fontSize: 11, fontWeight: 700, textAlign: "center" }}>{t.group}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                  <span style={{ color: inZone ? "#fff" : INK_SUB, fontSize: 12, fontWeight: inZone ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.name}</span>
+                  <OwnerBadge team={t.name} />
+                </div>
+                <span style={{ color: inZone ? GREEN : INK_SUB, fontSize: 12, fontWeight: 800, textAlign: "center" }}>{t.pts}</span>
+                <span style={{ color: t.gd > 0 ? GREEN : t.gd < 0 ? "#E0556E" : INK_SUB, fontSize: 11, fontWeight: 600, textAlign: "center" }}>{t.gd > 0 ? `+${t.gd}` : t.gd}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p style={{ color: "#3D4A5E", fontSize: 10, textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
+        Bracket structure: official FIFA 2026 Round of 32 (Matches 73–88). Projection only — actual matchups confirm when the group stage ends on 27 June.
+      </p>
     </div>
   );
 }
@@ -285,8 +458,8 @@ function FixturesTab() {
         <div key={date} style={{ marginBottom: 16 }}>
           <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px", textShadow: `0 0 8px ${GREEN}88` }}>{date}</p>
           {games.map((g, i) => {
-            const homeOwner = OWNERS[g.home];
-            const awayOwner = OWNERS[g.away];
+            const homeOwner = ownerOf(g.home);
+            const awayOwner = ownerOf(g.away);
             const hasOwner = homeOwner || awayOwner;
             return (
               <div key={i} style={{ background: hasOwner ? "rgba(64,198,160,0.07)" : NAVY2, border: `1px solid ${hasOwner ? "rgba(64,198,160,0.25)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "11px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, boxShadow: hasOwner ? `0 0 12px rgba(64,198,160,0.08)` : "none" }}>
@@ -417,6 +590,7 @@ export default function SweepstakeDashboard() {
     { id: "progression", label: "Progress" },
     { id: "squads",      label: "Squads" },
     { id: "groups",      label: "Groups" },
+    { id: "knockout",    label: "Knockout" },
     { id: "fixtures",    label: "Fixtures" },
     { id: "topteams",    label: "Top Teams" },
   ];
@@ -583,6 +757,7 @@ export default function SweepstakeDashboard() {
             </div>
           )}
 
+          {view === "knockout" && <KnockoutTab />}
           {view === "fixtures" && <FixturesTab />}
           {view === "topteams" && <TopTeams />}
           {view === "squads" && <SquadsTab />}
