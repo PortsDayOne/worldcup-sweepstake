@@ -12,7 +12,9 @@ const INK_SUB = "#8694AC";
 // Auto-derived from current standings — never hand-maintained.
 // CONFIRMED = clinched a top-2 group place (guaranteed knockout, ignoring any favourable
 //   head-to-head among rivals, so it only ever flags a team when it is mathematically certain).
-// ELIMINATED = cannot mathematically finish in the top 3 (locked into last place).
+// ELIMINATED = can no longer finish in the top 3 of its group (>=3 rivals already
+//   have more points than this team can still reach). Because the best 8 third-placed
+//   teams also qualify, a team isn't out until it can't even reach 3rd place.
 function deriveStatus() {
   const confirmed = new Set();
   const eliminated = new Set();
@@ -21,8 +23,8 @@ function deriveStatus() {
     ts.forEach(t => {
       const canReachT = ts.filter(r => r.name !== t.name && r.max >= t.pts).length;
       if (canReachT <= 1) confirmed.add(t.name);
-      const alreadyAbove = ts.filter(r => r.name !== t.name && r.pts > t.max).length;
-      if (alreadyAbove >= 3) eliminated.add(t.name);
+      const guaranteedAbove = ts.filter(r => r.name !== t.name && r.pts > t.max).length;
+      if (guaranteedAbove >= 3) eliminated.add(t.name);
     });
   });
   return { confirmed, eliminated };
@@ -98,10 +100,6 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 }
 
 const FIXTURES = [
-  { date: "Mon 22 Jun", time: "6pm bst BST", home: "Argentina", away: "Austria", group: "J" },
-  { date: "Mon 22 Jun", time: "10pm bst BST", home: "France", away: "Iraq", group: "I" },
-  { date: "Tue 23 Jun", time: "1am bst BST", home: "Norway", away: "Senegal", group: "I" },
-  { date: "Tue 23 Jun", time: "4am bst BST", home: "Jordan", away: "Algeria", group: "J" },
   { date: "Tue 23 Jun", time: "6pm bst BST", home: "Portugal", away: "Uzbekistan", group: "K" },
   { date: "Tue 23 Jun", time: "9pm bst BST", home: "England", away: "Ghana", group: "L" },
   { date: "Wed 24 Jun", time: "12am bst BST", home: "Panama", away: "Croatia", group: "L" },
@@ -374,10 +372,10 @@ const SQUAD_DATA = [
   { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:6 },{ f:"🇳🇱", n:"Netherlands", p:4 },{ f:"🇲🇦", n:"Morocco", p:4 },{ f:"🇦🇷", n:"Argentina", p:6 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:3 },{ f:"🇵🇾", n:"Paraguay", p:3 }] },
   { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:4 },{ f:"🇦🇺", n:"Australia", p:3 },{ f:"🇨🇮", n:"Ivory Coast", p:3 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:1 }] },
   { name: "Joanne",  teams: [{ f:"🇩🇪", n:"Germany", p:6 },{ f:"🇨🇦", n:"Canada", p:4 },{ f:"🇨🇴", n:"Colombia", p:3 },{ f:"🇿🇦", n:"South Africa", p:1 },{ f:"🇨🇼", n:"Curaçao", p:1 },{ f:"🇹🇳", n:"Tunisia", p:0 }] },
-  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:3 },{ f:"🇳🇴", n:"Norway", p:3 },{ f:"🇸🇪", n:"Sweden", p:3 },{ f:"🇪🇸", n:"Spain", p:4 },{ f:"🇺🇾", n:"Uruguay", p:2 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
+  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:6 },{ f:"🇳🇴", n:"Norway", p:6 },{ f:"🇸🇪", n:"Sweden", p:3 },{ f:"🇪🇸", n:"Spain", p:4 },{ f:"🇺🇾", n:"Uruguay", p:2 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
   { name: "Joe",     teams: [{ f:"🇯🇵", n:"Japan", p:4 },{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:2 },{ f:"🇮🇷", n:"Iran", p:2 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
   { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:3 },{ f:"🇨🇭", n:"Switzerland", p:4 },{ f:"🇵🇹", n:"Portugal", p:1 },{ f:"🇪🇨", n:"Ecuador", p:1 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
-  { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:4 },{ f:"🇸🇳", n:"Senegal", p:0 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:0 }] },
+  { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:4 },{ f:"🇸🇳", n:"Senegal", p:0 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:3 }] },
   { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:2 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:0 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:0 }] },
 ];
 
@@ -567,14 +565,14 @@ export default function SweepstakeDashboard() {
               <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 12px", textShadow: `0 0 8px ${GREEN}88` }}>Form Guide</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { name: "Lottie", emoji: "🔥", headline: "Runaway leader", text: "Lottie is out front on 26 and pulling clear. Mexico have already won Group A, and Argentina joined them in the last 32 after Messi's record-breaking brace sank Austria. With Morocco and the Netherlands both on four and England and Paraguay still alive, she has a depth nobody else can match." },
-                  { name: "Tom",    emoji: "⚡", headline: "Big guns, light support", text: "Second on 18, carried by group winners USA and a Brazil side that found its feet with a 3-0 win over Haiti. The worry is the bottom of his squad: Saudi Arabia and Bosnia have a point each and look unlikely to add much. His ceiling rests on USA, Brazil and Ivory Coast going deep." },
-                  { name: "Sam",    emoji: "🎯", headline: "Coming to life", text: "The flat spell is over. France and Norway both opened with wins to lift Sam to 15, and crucially he still has games in hand. Spain's 4-0 thrashing of Saudi Arabia anchors him. If his contenders deliver he could climb fast; if they stall, he's stuck in the pack." },
-                  { name: "Joanne", emoji: "📈", headline: "The climb continues", text: "From bottom of the pile to right in the mix on 15. Germany are through after racking up nine goals, and Canada and Colombia give her a strong spine. South Africa, Curaçao and Tunisia are the dead weight, but with Germany flying she's level with Sam and breathing down Tom's neck." },
-                  { name: "Joe",    emoji: "🤞", headline: "Quietly effective", text: "Scrap the 'living on draws' tag — Joe has real wins now, with Japan hammering Tunisia 4-0 and South Korea seeing off Czechia. Add the draws from Belgium, Iran and DR Congo and he's a tidy 13, scoring points from all six of his teams. No superstar run yet, but the most reliable accumulator in the field." },
-                  { name: "Darrell",emoji: "🎲", headline: "Pinned to Portugal", text: "Switzerland's 4-1 demolition of Bosnia and Ghana's win over Panama show Darrell has firepower in spots. But Haiti and Panama are both out, and Ecuador and Portugal are clinging on with a point each. On 9, his hopes ride almost entirely on how far Switzerland and Portugal can go." },
-                  { name: "Matt",   emoji: "😬", headline: "Still painful", text: "The tough watch continues. Egypt are his standout on four, and Scotland and Austria both have three — but Austria were just swept aside by Messi's Argentina, and Senegal, Iraq and Algeria are all still pointless. On 10 and needing the big names in his rivals' squads to slip up." },
-                  { name: "Karina", emoji: "💀", headline: "Miracle needed", text: "Still the toughest hand by a distance. Türkiye are eliminated, and Croatia, Jordan and Qatar are all struggling badly. Cape Verde are the lone bright spot, grinding out two draws — including a 2-2 with Uruguay — for two points. On 4, Karina needs results to start falling her way, and fast." },
+                  { name: "Lottie", emoji: "🔥", headline: "Lead is shrinking", text: "Still top, but no longer untouchable — Sam's big night cuts the gap to 5. Mexico and Argentina are through, Morocco and the Netherlands sit on four, and England and Paraguay are alive. The depth keeps her in front, but she can't cruise from here." },
+                  { name: "Sam",    emoji: "🚀", headline: "The surge", text: "The night belonged to Sam. France and Norway both won and sealed their last-32 places, rocketing him from mid-pack to second on 21 — a six-point haul in one round. Spain still lead Group H too. The 'flattering to deceive' tag is well and truly buried." },
+                  { name: "Tom",    emoji: "⚡", headline: "Overtaken", text: "A bad night without kicking a ball — Sam leapfrogged him into second. USA and Brazil are still the engine, but Saudi Arabia and Bosnia are spent, and none of his teams played this round. He needs his big names to keep delivering or the slide continues." },
+                  { name: "Joanne", emoji: "📈", headline: "Drifting", text: "A quiet round, holding on 15. Germany are through and Canada and Colombia form a solid core, but South Africa, Curaçao and Tunisia are dead weight. Nothing moved this time, and she's slipping off the back of the top three." },
+                  { name: "Joe",    emoji: "🤞", headline: "Caught", text: "Steady on 13, with two real wins from Japan and South Korea plus draws off Belgium, Iran and DR Congo. Nothing changed this round — but Matt has now pulled level, so Joe needs his sides to kick on before he's overtaken." },
+                  { name: "Matt",   emoji: "🌱", headline: "First signs of life", text: "Finally, a good night. Algeria beat Jordan to lift Matt level with Joe on 13. Egypt and Scotland anchor him, and while Senegal and Iraq are still pointless, this is the first real momentum he's had all tournament." },
+                  { name: "Darrell",emoji: "🎲", headline: "Stuck", text: "Flat round, still on 9. Switzerland and Ghana carry him, but Haiti and Panama are gone and Ecuador and Portugal cling on with a point apiece. His ceiling rests entirely on how far Switzerland and Portugal can run." },
+                  { name: "Karina", emoji: "💀", headline: "Miracle needed", text: "Still bottom on 4. Jordan lost again, so no relief there, and Türkiye, Croatia and Qatar are all but finished. Cape Verde's two draws remain her only return. It would take something extraordinary from here." },
                 ].map((p, i) => {
                   const player = PLAYERS.find(pl => pl.name === p.name);
                   const col = player?.color || "#666";
