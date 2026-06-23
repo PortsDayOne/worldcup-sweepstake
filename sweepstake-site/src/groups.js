@@ -100,16 +100,16 @@ export const GROUPS = [
     { name: "Saudi Arabia", gp:2, w:0, d:1, l:1, gf:1, ga:5, pts:1 }
   ]},
   { name: "Group I", teams: [
-    { name: "Norway", gp:1, w:1, d:0, l:0, gf:4, ga:1, pts:3 },
-    { name: "France", gp:1, w:1, d:0, l:0, gf:3, ga:1, pts:3 },
-    { name: "Senegal", gp:1, w:0, d:0, l:1, gf:1, ga:3, pts:0 },
-    { name: "Iraq", gp:1, w:0, d:0, l:1, gf:1, ga:4, pts:0 }
+    { name: "France", gp:2, w:2, d:0, l:0, gf:6, ga:1, pts:6 },
+    { name: "Norway", gp:2, w:2, d:0, l:0, gf:7, ga:3, pts:6 },
+    { name: "Senegal", gp:2, w:0, d:0, l:2, gf:3, ga:6, pts:0 },
+    { name: "Iraq", gp:2, w:0, d:0, l:2, gf:1, ga:7, pts:0 }
   ]},
   { name: "Group J", teams: [
     { name: "Argentina", gp:2, w:2, d:0, l:0, gf:5, ga:0, pts:6 },
     { name: "Austria", gp:2, w:1, d:0, l:1, gf:3, ga:3, pts:3 },
-    { name: "Jordan", gp:1, w:0, d:0, l:1, gf:1, ga:3, pts:0 },
-    { name: "Algeria", gp:1, w:0, d:0, l:1, gf:0, ga:3, pts:0 }
+    { name: "Algeria", gp:2, w:1, d:0, l:1, gf:2, ga:4, pts:3 },
+    { name: "Jordan", gp:2, w:0, d:0, l:2, gf:2, ga:5, pts:0 }
   ]},
   { name: "Group K", teams: [
     { name: "Colombia", gp:1, w:1, d:0, l:0, gf:3, ga:1, pts:3 },
