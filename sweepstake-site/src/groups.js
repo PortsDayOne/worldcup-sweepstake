@@ -70,22 +70,22 @@ export const GROUPS = [
     { name: "Haiti", gp:3, w:0, d:0, l:3, gf:2, ga:8, pts:0 }
   ]},
   { name: "Group D", teams: [
-    { name: "USA", gp:2, w:2, d:0, l:0, gf:6, ga:1, pts:6 },
-    { name: "Australia", gp:2, w:1, d:0, l:1, gf:2, ga:2, pts:3 },
-    { name: "Paraguay", gp:2, w:1, d:0, l:1, gf:2, ga:4, pts:3 },
-    { name: "Turkey", gp:2, w:0, d:0, l:2, gf:0, ga:3, pts:0 }
+    { name: "USA", gp:3, w:2, d:0, l:1, gf:8, ga:4, pts:6 },
+    { name: "Australia", gp:3, w:1, d:1, l:1, gf:2, ga:2, pts:4 },
+    { name: "Paraguay", gp:3, w:1, d:1, l:1, gf:2, ga:4, pts:4 },
+    { name: "Turkey", gp:3, w:1, d:0, l:2, gf:3, ga:5, pts:3 }
   ]},
   { name: "Group E", teams: [
-    { name: "Germany", gp:2, w:2, d:0, l:0, gf:9, ga:2, pts:6 },
-    { name: "Ivory Coast", gp:2, w:1, d:0, l:1, gf:2, ga:2, pts:3 },
-    { name: "Ecuador", gp:2, w:0, d:1, l:1, gf:0, ga:1, pts:1 },
-    { name: "Curaçao", gp:2, w:0, d:1, l:1, gf:1, ga:7, pts:1 }
+    { name: "Germany", gp:3, w:2, d:0, l:1, gf:10, ga:4, pts:6 },
+    { name: "Ivory Coast", gp:3, w:2, d:0, l:1, gf:4, ga:2, pts:6 },
+    { name: "Ecuador", gp:3, w:1, d:1, l:1, gf:2, ga:2, pts:4 },
+    { name: "Curaçao", gp:3, w:0, d:1, l:2, gf:1, ga:9, pts:1 }
   ]},
   { name: "Group F", teams: [
-    { name: "Netherlands", gp:2, w:1, d:1, l:0, gf:7, ga:3, pts:4 },
-    { name: "Japan", gp:2, w:1, d:1, l:0, gf:6, ga:2, pts:4 },
-    { name: "Sweden", gp:2, w:1, d:0, l:1, gf:6, ga:6, pts:3 },
-    { name: "Tunisia", gp:2, w:0, d:0, l:2, gf:1, ga:9, pts:0 }
+    { name: "Netherlands", gp:3, w:2, d:1, l:0, gf:10, ga:4, pts:7 },
+    { name: "Japan", gp:3, w:1, d:2, l:0, gf:7, ga:3, pts:5 },
+    { name: "Sweden", gp:3, w:1, d:1, l:1, gf:7, ga:7, pts:4 },
+    { name: "Tunisia", gp:3, w:0, d:0, l:3, gf:2, ga:12, pts:0 }
   ]},
   { name: "Group G", teams: [
     { name: "Egypt", gp:2, w:1, d:1, l:0, gf:4, ga:2, pts:4 },
