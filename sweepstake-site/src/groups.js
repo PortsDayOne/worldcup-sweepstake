@@ -124,3 +124,19 @@ export const GROUPS = [
     { name: "Panama", gp:2, w:0, d:0, l:2, gf:0, ga:2, pts:0 }
   ]}
 ];
+
+// Title-odds-derived strength rating per team (≈ implied % chance to WIN the World Cup,
+// from FanDuel/market outright odds). Refresh periodically as odds move. Used by the
+// dashboard's blended Win Index. Keyed by the exact GROUPS team names above.
+export const STRENGTH = {
+  "France": 21.3, "Spain": 16.7, "Argentina": 14.3, "England": 12.5, "Portugal": 9.1,
+  "Brazil": 8.3, "Germany": 7.1, "Netherlands": 7.1, "Belgium": 4.8, "Switzerland": 4.3,
+  "USA": 3.2, "Croatia": 2.9, "Norway": 2.8, "Morocco": 2.4, "Colombia": 2.0,
+  "Japan": 2.0, "Mexico": 2.0, "Uruguay": 1.8, "Senegal": 1.2, "Ecuador": 1.0,
+  "Ivory Coast": 0.8, "South Korea": 0.7, "Canada": 0.7, "Australia": 0.6, "Austria": 0.6,
+  "Egypt": 0.6, "Sweden": 0.6, "Turkey": 0.5, "Paraguay": 0.5, "Ghana": 0.5,
+  "Czechia": 0.4, "Scotland": 0.4, "Algeria": 0.4, "Iran": 0.4, "Congo DR": 0.3,
+  "Saudi Arabia": 0.3, "Bosnia-Herzegovina": 0.3, "South Africa": 0.3, "Iraq": 0.2,
+  "Cape Verde Islands": 0.2, "New Zealand": 0.2, "Uzbekistan": 0.2, "Panama": 0.2,
+  "Tunisia": 0.2, "Curaçao": 0.1, "Qatar": 0.1, "Jordan": 0.1, "Haiti": 0.1
+};
