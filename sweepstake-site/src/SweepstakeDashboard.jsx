@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 import { PLAYERS, PROGRESSION, RECENT, LAST_UPDATED } from "./data.js";
-import { GROUPS, OWNERS, PLAYER_COLORS } from "./groups.js";
+import { GROUPS, OWNERS, PLAYER_COLORS, STRENGTH } from "./groups.js";
 
 const NAVY = "#0E1A2E";
 const NAVY2 = "#16243F";
@@ -52,6 +52,29 @@ const TEAM_ALIASES = {
 };
 function ownerOf(team) {
   return OWNERS[team] || OWNERS[TEAM_ALIASES[team]] || null;
+}
+
+// Blended "Win Index": each player's overall chance of topping the sweepstake.
+//   50% live World Cup title odds (STRENGTH) of their still-alive teams,
+//   30% current sweepstake points, 20% number of teams through to the last 32.
+// Each component is taken as a share of the 8-player total, weighted, and summed,
+// so every player's % naturally adds up to 100. Eliminated teams contribute 0 title odds.
+function computeWinIndex() {
+  const titleEq = {}, through = {}, points = {};
+  PLAYERS.forEach(p => { titleEq[p.name] = 0; through[p.name] = 0; points[p.name] = p.total; });
+  GROUPS.forEach(g => g.teams.forEach(t => {
+    const owner = ownerOf(t.name);
+    if (!owner) return;
+    if (!ELIMINATED.has(t.name)) titleEq[owner] += (STRENGTH[t.name] || 0);
+    if (CONFIRMED.has(t.name)) through[owner] += 1;
+  }));
+  const total = obj => Object.values(obj).reduce((a, b) => a + b, 0) || 1;
+  const sT = total(titleEq), sP = total(points), sThr = total(through);
+  const W_TITLE = 0.5, W_PTS = 0.3, W_THR = 0.2;
+  return PLAYERS.map(p => {
+    const share = W_TITLE * (titleEq[p.name] / sT) + W_PTS * (points[p.name] / sP) + W_THR * (through[p.name] / sThr);
+    return { name: p.name, color: p.color, pct: share * 100, titleEq: titleEq[p.name], points: points[p.name], through: through[p.name] };
+  }).sort((a, b) => b.pct - a.pct);
 }
 
 // Map a team property keyed by BOTH the groups.js spelling and the OWNERS spelling,
@@ -112,10 +135,16 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 const FIXTURES = [
   { date: "Fri 26 Jun", time: "8pm BST", home: "Norway", away: "France", group: "I" },
   { date: "Fri 26 Jun", time: "8pm BST", home: "Senegal", away: "Iraq", group: "I" },
+  { date: "Fri 26 Jun", time: "11pm BST", home: "Argentina", away: "Jordan", group: "J" },
+  { date: "Fri 26 Jun", time: "11pm BST", home: "Austria", away: "Algeria", group: "J" },
   { date: "Sat 27 Jun", time: "1am BST", home: "Uruguay", away: "Spain", group: "H" },
   { date: "Sat 27 Jun", time: "1am BST", home: "Cape Verde", away: "Saudi Arabia", group: "H" },
   { date: "Sat 27 Jun", time: "4am BST", home: "Egypt", away: "Iran", group: "G" },
-  { date: "Sat 27 Jun", time: "4am BST", home: "New Zealand", away: "Belgium", group: "G" }
+  { date: "Sat 27 Jun", time: "4am BST", home: "New Zealand", away: "Belgium", group: "G" },
+  { date: "Sat 27 Jun", time: "8pm BST", home: "Panama", away: "England", group: "L" },
+  { date: "Sat 27 Jun", time: "8pm BST", home: "Croatia", away: "Ghana", group: "L" },
+  { date: "Sat 27 Jun", time: "11pm BST", home: "Colombia", away: "Portugal", group: "K" },
+  { date: "Sat 27 Jun", time: "11pm BST", home: "Congo DR", away: "Uzbekistan", group: "K" }
 ];
 
 function getForm(name) {
@@ -256,6 +285,34 @@ function GroupCard({ group }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function WinIndexTab() {
+  const rows = computeWinIndex();
+  const max = rows[0] ? rows[0].pct : 1;
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.65 }}>
+        Each player's overall chance of winning the sweepstake — a blend of <span style={{ color: "#B6C2D6" }}>50%</span> live World Cup title odds of your surviving teams, <span style={{ color: "#B6C2D6" }}>30%</span> current points, and <span style={{ color: "#B6C2D6" }}>20%</span> teams through to the last 32. All eight add up to 100%.
+      </p>
+      {rows.map((r, i) => (
+        <div key={r.name} style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <span style={{ color: "#fff", fontSize: 15, fontWeight: 800 }}>
+              <span style={{ color: INK_SUB, fontSize: 12, marginRight: 9 }}>{i + 1}</span>{r.name}
+            </span>
+            <span style={{ color: r.color, fontSize: 21, fontWeight: 900, textShadow: `0 0 12px ${r.color}55` }}>{r.pct.toFixed(1)}%</span>
+          </div>
+          <div style={{ height: 8, background: "rgba(255,255,255,0.06)", borderRadius: 6, overflow: "hidden" }}>
+            <div style={{ width: `${(r.pct / max) * 100}%`, height: "100%", background: r.color, borderRadius: 6, boxShadow: `0 0 10px ${r.color}88` }} />
+          </div>
+          <p style={{ color: INK_SUB, fontSize: 10.5, margin: "7px 0 0", letterSpacing: 0.3 }}>
+            {r.titleEq.toFixed(1)} title odds · {r.points} pts · {r.through} through
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -474,6 +531,7 @@ export default function SweepstakeDashboard() {
 
   const tabs = [
     { id: "standings",   label: "Standings" },
+    { id: "winindex",    label: "Win %" },
     { id: "progression", label: "Progress" },
     { id: "squads",      label: "Squads" },
     { id: "groups",      label: "Groups" },
@@ -660,6 +718,7 @@ export default function SweepstakeDashboard() {
           )}
 
           {view === "fixtures" && <FixturesTab />}
+          {view === "winindex" && <WinIndexTab />}
           {view === "topteams" && <TopTeams />}
           {view === "squads" && <SquadsTab />}
         </TabPanel>
