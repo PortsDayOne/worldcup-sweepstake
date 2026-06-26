@@ -110,12 +110,12 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 }
 
 const FIXTURES = [
-  { date: "Thu 25 Jun", time: "9pm bst BST", home: "Ecuador", away: "Germany", group: "E" },
-  { date: "Thu 25 Jun", time: "9pm bst BST", home: "Curaçao", away: "Ivory Coast", group: "E" }
-,  { date: "Fri 26 Jun", time: "12am bst BST", home: "Japan", away: "Sweden", group: "F" },
-  { date: "Fri 26 Jun", time: "12am bst BST", home: "Tunisia", away: "Netherlands", group: "F" },
-  { date: "Fri 26 Jun", time: "3am bst BST", home: "Turkey", away: "USA", group: "D" },
-  { date: "Fri 26 Jun", time: "3am bst BST", home: "Paraguay", away: "Australia", group: "D" }
+  { date: "Fri 26 Jun", time: "8pm BST", home: "Norway", away: "France", group: "I" },
+  { date: "Fri 26 Jun", time: "8pm BST", home: "Senegal", away: "Iraq", group: "I" },
+  { date: "Sat 27 Jun", time: "1am BST", home: "Uruguay", away: "Spain", group: "H" },
+  { date: "Sat 27 Jun", time: "1am BST", home: "Cape Verde", away: "Saudi Arabia", group: "H" },
+  { date: "Sat 27 Jun", time: "4am BST", home: "Egypt", away: "Iran", group: "G" },
+  { date: "Sat 27 Jun", time: "4am BST", home: "New Zealand", away: "Belgium", group: "G" }
 ];
 
 function getForm(name) {
@@ -373,14 +373,14 @@ function FixturesTab() {
 
 // Squad data: each player's 6 teams with flags (emoji) and current points
 const SQUAD_DATA = [
-  { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:9 },{ f:"🇳🇱", n:"Netherlands", p:4 },{ f:"🇲🇦", n:"Morocco", p:7 },{ f:"🇦🇷", n:"Argentina", p:6 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:4 },{ f:"🇵🇾", n:"Paraguay", p:3 }] },
-  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:7 },{ f:"🇦🇺", n:"Australia", p:3 },{ f:"🇨🇮", n:"Ivory Coast", p:3 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:4 }] },
+  { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:9 },{ f:"🇳🇱", n:"Netherlands", p:7 },{ f:"🇲🇦", n:"Morocco", p:7 },{ f:"🇦🇷", n:"Argentina", p:6 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:4 },{ f:"🇵🇾", n:"Paraguay", p:4 }] },
+  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:7 },{ f:"🇦🇺", n:"Australia", p:4 },{ f:"🇨🇮", n:"Ivory Coast", p:6 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:4 }] },
   { name: "Joanne",  teams: [{ f:"🇩🇪", n:"Germany", p:6 },{ f:"🇨🇦", n:"Canada", p:4 },{ f:"🇨🇴", n:"Colombia", p:6 },{ f:"🇿🇦", n:"South Africa", p:4 },{ f:"🇨🇼", n:"Curaçao", p:1 },{ f:"🇹🇳", n:"Tunisia", p:0 }] },
-  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:6 },{ f:"🇳🇴", n:"Norway", p:6 },{ f:"🇸🇪", n:"Sweden", p:3 },{ f:"🇪🇸", n:"Spain", p:4 },{ f:"🇺🇾", n:"Uruguay", p:2 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
-  { name: "Joe",     teams: [{ f:"🇯🇵", n:"Japan", p:4 },{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:2 },{ f:"🇮🇷", n:"Iran", p:2 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
-  { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:4 },{ f:"🇨🇭", n:"Switzerland", p:7 },{ f:"🇵🇹", n:"Portugal", p:4 },{ f:"🇪🇨", n:"Ecuador", p:1 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
+  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:6 },{ f:"🇳🇴", n:"Norway", p:6 },{ f:"🇸🇪", n:"Sweden", p:4 },{ f:"🇪🇸", n:"Spain", p:4 },{ f:"🇺🇾", n:"Uruguay", p:2 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
+  { name: "Joe",     teams: [{ f:"🇯🇵", n:"Japan", p:5 },{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:2 },{ f:"🇮🇷", n:"Iran", p:2 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
+  { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:4 },{ f:"🇨🇭", n:"Switzerland", p:7 },{ f:"🇵🇹", n:"Portugal", p:4 },{ f:"🇪🇨", n:"Ecuador", p:4 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
   { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:4 },{ f:"🇸🇳", n:"Senegal", p:0 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:3 }] },
-  { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:2 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:0 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:3 }] },
+  { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:2 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:3 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:3 }] },
 ];
 
 function FlipCard({ player }) {
@@ -569,14 +569,14 @@ export default function SweepstakeDashboard() {
               <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 12px", textShadow: `0 0 8px ${GREEN}88` }}>Form Guide</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { name: "Lottie", emoji: "🔥", headline: "Running away with it", text: "Mexico won Group A with a perfect nine points and Morocco took second in C — a +6 night that pushes Lottie to 33 and a nine-point cushion. Argentina are through too, with Netherlands, England and Paraguay still live. This is hers to lose now." },
-                  { name: "Tom",    emoji: "⚡", headline: "Storming into second", text: "A huge round. Brazil topped Group C and Bosnia battled to a third-place finish by beating Qatar, handing Tom +6 and clear second on 24. With USA also strong, his squad suddenly has serious depth heading into the knockouts." },
-                  { name: "Sam",    emoji: "🥈", headline: "Slips to third", text: "A rest round — none of Sam's teams were in action as A–C wrapped up, so he holds on 21 but slips to third as Tom surged past and Joanne drew level. France and Norway are safely through and Spain lead Group H; his final-round games will decide it." },
-                  { name: "Joanne", emoji: "📈", headline: "Four through and counting", text: "South Africa's shock win over South Korea sent them through in second and lifted Joanne level with Sam on 21. With Germany, Colombia and Canada also into the last 32, she now has four qualified teams — more than anyone. A serious quiet climb." },
-                  { name: "Darrell",emoji: "🚀", headline: "Up and clear", text: "Switzerland won Group B to bank Darrell another three and lift him to 16, clear of the Joe/Matt logjam. Portugal and Ghana are still alive too. The flip side: Haiti finished bottom of Group C and are out — but topping a group is a real prize." },
-                  { name: "Joe",    emoji: "🤞", headline: "Stalled and passed", text: "A rough round. South Korea were beaten by South Africa and slip to third in Group A, and Czechia finished bottom and are eliminated. Joe stays on 13 and is overtaken by Darrell. Japan and Belgium carry his hopes into the final round." },
-                  { name: "Matt",   emoji: "😴", headline: "Treading water", text: "No real movement — Scotland finished third in Group C without adding to his tally, and his other sides sat idle. He stays on 13, level with Joe. Egypt and his Group I and J finishers are his last hope of climbing off the mid-table floor." },
-                  { name: "Karina", emoji: "🌱", headline: "Clinging on", text: "Qatar finished bottom of Group B and are out, the latest blow to a brutal campaign. Karina holds on 7. Croatia and Cape Verde, both chasing third-place spots, remain her only real contributors. Still last, still needing a small miracle." },
+                  { name: "Lottie", emoji: "🔥", headline: "Out of sight", text: "Netherlands won Group F and Paraguay nicked a point, pushing Lottie to 37 and a nine-point lead. Mexico, Morocco and the Dutch are all through, Argentina are all but there, and even third-placed Paraguay should sneak into the last 32. This one is hers to lose." },
+                  { name: "Tom",    emoji: "⚡", headline: "Clear in second", text: "Another strong night. Ivory Coast took second in Group E and Australia drew to grab second in Group D — a +4 round that lifts Tom to 28. With USA topping their group and Brazil already through, he has a stack of qualified teams and a firm grip on second." },
+                  { name: "Sam",    emoji: "🥈", headline: "Quietly into third", text: "Sweden's draw with Japan nudged Sam to 22 and a lone third. France and Norway are safely through and meet tonight in the Group I decider, with Spain still to play. A low-drama campaign — now he needs his big names to fire when the knockouts arrive." },
+                  { name: "Joanne", emoji: "📈", headline: "Stuck on 21", text: "A flat night that only confirmed the obvious: Germany are through as group winners, while Curaçao and Tunisia finished bottom and are out. Joanne holds on 21 — but with Germany, Colombia, Canada and South Africa all qualified, she has four teams in the last 32, more than anyone." },
+                  { name: "Darrell",emoji: "🚀", headline: "Still surging", text: "Ecuador's stunning upset of Germany earned Darrell another three and lifted him to 19. Switzerland topped their group, with Portugal and Ghana still alive. Haiti and Panama are long gone, but his climb from rock bottom to the edge of the top four has been the story of the week." },
+                  { name: "Joe",    emoji: "🤞", headline: "Inching up", text: "Japan's draw with Sweden sealed second in Group F and nudged Joe to 14, just ahead of Matt. Japan and third-placed South Korea are his live ones; Czechia are out. He needs his Group G pair, Belgium and Iran, to deliver tonight to keep climbing." },
+                  { name: "Matt",   emoji: "😴", headline: "Left behind", text: "No games again for Matt's teams, so he slips to seventh on 13, now behind Joe. Scotland and Austria cling to third-place hopes, but Senegal, Iraq and Algeria have offered little. His Group I and J sides play tonight — it's now or never to climb off the floor." },
+                  { name: "Karina", emoji: "🌱", headline: "A pulse", text: "Türkiye signed off with a shock 3-2 win over the USA — too late to save themselves, as they finished bottom and are out, but it earned Karina three points and lifted her into double figures at 10. Croatia and Cape Verde, both chasing third spots, are her last real hopes." },
                 ].map((p, i) => {
                   const player = PLAYERS.find(pl => pl.name === p.name);
                   const col = player?.color || "#666";
