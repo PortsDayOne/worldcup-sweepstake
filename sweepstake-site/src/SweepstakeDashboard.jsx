@@ -147,6 +147,45 @@ const FIXTURES = [
   { date: "Sat 27 Jun", time: "11pm BST", home: "Congo DR", away: "Uzbekistan", group: "K" }
 ];
 
+// ---------- Round of 32 bracket (official FIFA match numbers 73–88) ----------
+// Slots are codes: "1X"/"2X" = winner/runner-up of Group X (auto-resolves once that
+// group is finished); "3:..." = a third-place slot that stays a label until the best-8
+// thirds are assigned after the group stage. The bracket fills itself as groups complete.
+const R32 = [
+  { m: 73, date: "Sun 28 Jun", venue: "Los Angeles", a: "2A", b: "2B" },
+  { m: 76, date: "Mon 29 Jun", venue: "Houston",     a: "1C", b: "2F" },
+  { m: 74, date: "Mon 29 Jun", venue: "Boston",      a: "1E", b: "3:A/B/C/D/F" },
+  { m: 75, date: "Tue 30 Jun", venue: "Monterrey",   a: "1F", b: "2C" },
+  { m: 78, date: "Tue 30 Jun", venue: "Dallas",      a: "2E", b: "2I" },
+  { m: 77, date: "Tue 30 Jun", venue: "New Jersey",  a: "1I", b: "3:C/D/F/G/H" },
+  { m: 79, date: "Wed 1 Jul",  venue: "Mexico City", a: "1A", b: "3:C/E/F/H/I" },
+  { m: 80, date: "Wed 1 Jul",  venue: "Atlanta",     a: "1L", b: "3:E/H/I/J/K" },
+  { m: 82, date: "Wed 1 Jul",  venue: "Seattle",     a: "1G", b: "3:A/E/H/I/J" },
+  { m: 81, date: "Thu 2 Jul",  venue: "Santa Clara", a: "1D", b: "3:B/E/F/I/J" },
+  { m: 83, date: "Thu 2 Jul",  venue: "Los Angeles", a: "1H", b: "2J" },
+  { m: 84, date: "Thu 2 Jul",  venue: "Vancouver",   a: "1B", b: "3:E/F/G/I/J" },
+  { m: 85, date: "Thu 2 Jul",  venue: "Philadelphia",a: "2K", b: "2L" },
+  { m: 88, date: "Fri 3 Jul",  venue: "Dallas",      a: "2D", b: "2G" },
+  { m: 86, date: "Fri 3 Jul",  venue: "Miami",       a: "1J", b: "2H" },
+  { m: 87, date: "Fri 3 Jul",  venue: "Kansas City", a: "1K", b: "3:D/E/I/J/L" },
+];
+
+function rankTeams(a, b) {
+  return b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf;
+}
+
+// Resolve a bracket slot code to an actual team (if known) plus a fallback label.
+function resolveSlot(code) {
+  if (code.startsWith("3:")) return { team: null, label: "3rd " + code.slice(2) };
+  const pos = code[0], gl = code.slice(1);
+  const label = (pos === "1" ? "Winner " : "Runner-up ") + gl;
+  const g = GROUPS.find(x => x.name === "Group " + gl);
+  if (!g || !g.teams.every(t => t.gp >= 3)) return { team: null, label };
+  const sorted = [...g.teams].sort(rankTeams);
+  return { team: (pos === "1" ? sorted[0] : sorted[1]).name, label };
+}
+
+
 function getForm(name) {
   if (PROGRESSION.length < 2) return "same";
   const prev = PROGRESSION[PROGRESSION.length - 2][name] ?? 0;
@@ -313,6 +352,61 @@ function WinIndexTab() {
           </p>
         </div>
       ))}
+    </div>
+  );
+}
+
+function BracketTab() {
+  const Slot = ({ code }) => {
+    const { team, label } = resolveSlot(code);
+    if (!team) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", height: 30, padding: "0 4px" }}>
+          <span style={{ color: "#5C6B82", fontSize: 12.5, fontStyle: "italic" }}>{label}</span>
+        </div>
+      );
+    }
+    const owner = ownerOf(team);
+    const col = (owner && PLAYER_COLORS[owner]) || "#5C6B82";
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 30, padding: "0 4px" }}>
+        <span style={{ color: "#fff", fontSize: 13.5, fontWeight: 700 }}>{team}</span>
+        {owner && (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: col, boxShadow: `0 0 6px ${col}` }} />
+            <span style={{ color: col, fontSize: 10.5, fontWeight: 700 }}>{owner}</span>
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  let lastDate = null;
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>
+        Round of 32. Finished groups fill in automatically; the rest show their slot (Winner G, Runner-up H…) until the games are played. Third-place slots lock once the best-8 thirds are known after the group stage.
+      </p>
+      {R32.map(match => {
+        const showDate = match.date !== lastDate;
+        lastDate = match.date;
+        return (
+          <div key={match.m}>
+            {showDate && (
+              <p style={{ color: GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", margin: "14px 0 8px" }}>{match.date}</p>
+            )}
+            <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "8px 12px", marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+                <span style={{ color: "#3D4A5E", fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Match {match.m}</span>
+                <span style={{ color: "#3D4A5E", fontSize: 9.5 }}>{match.venue}</span>
+              </div>
+              <Slot code={match.a} />
+              <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "1px 0" }} />
+              <Slot code={match.b} />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -532,6 +626,7 @@ export default function SweepstakeDashboard() {
   const tabs = [
     { id: "standings",   label: "Standings" },
     { id: "winindex",    label: "Win %" },
+    { id: "knockouts",   label: "Knockouts" },
     { id: "progression", label: "Progress" },
     { id: "squads",      label: "Squads" },
     { id: "groups",      label: "Groups" },
@@ -719,6 +814,7 @@ export default function SweepstakeDashboard() {
 
           {view === "fixtures" && <FixturesTab />}
           {view === "winindex" && <WinIndexTab />}
+          {view === "knockouts" && <BracketTab />}
           {view === "topteams" && <TopTeams />}
           {view === "squads" && <SquadsTab />}
         </TabPanel>
