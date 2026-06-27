@@ -133,18 +133,12 @@ function TeamsText({ text, baseColor = "#8694AC" }) {
 }
 
 const FIXTURES = [
-  { date: "Fri 26 Jun", time: "8pm BST", home: "Norway", away: "France", group: "I" },
-  { date: "Fri 26 Jun", time: "8pm BST", home: "Senegal", away: "Iraq", group: "I" },
-  { date: "Fri 26 Jun", time: "11pm BST", home: "Argentina", away: "Jordan", group: "J" },
-  { date: "Fri 26 Jun", time: "11pm BST", home: "Austria", away: "Algeria", group: "J" },
-  { date: "Sat 27 Jun", time: "1am BST", home: "Uruguay", away: "Spain", group: "H" },
-  { date: "Sat 27 Jun", time: "1am BST", home: "Cape Verde", away: "Saudi Arabia", group: "H" },
-  { date: "Sat 27 Jun", time: "4am BST", home: "Egypt", away: "Iran", group: "G" },
-  { date: "Sat 27 Jun", time: "4am BST", home: "New Zealand", away: "Belgium", group: "G" },
-  { date: "Sat 27 Jun", time: "8pm BST", home: "Panama", away: "England", group: "L" },
-  { date: "Sat 27 Jun", time: "8pm BST", home: "Croatia", away: "Ghana", group: "L" },
-  { date: "Sat 27 Jun", time: "11pm BST", home: "Colombia", away: "Portugal", group: "K" },
-  { date: "Sat 27 Jun", time: "11pm BST", home: "Congo DR", away: "Uzbekistan", group: "K" }
+  { date: "Sat 27 Jun", time: "10pm BST", home: "Panama", away: "England", group: "L" },
+  { date: "Sat 27 Jun", time: "10pm BST", home: "Croatia", away: "Ghana", group: "L" },
+  { date: "Sun 28 Jun", time: "12:30am BST", home: "Colombia", away: "Portugal", group: "K" },
+  { date: "Sun 28 Jun", time: "12:30am BST", home: "DR Congo", away: "Uzbekistan", group: "K" },
+  { date: "Sun 28 Jun", time: "3am BST", home: "Jordan", away: "Argentina", group: "J" },
+  { date: "Sun 28 Jun", time: "3am BST", home: "Algeria", away: "Austria", group: "J" }
 ];
 
 // ---------- Round of 32 bracket (official FIFA match numbers 73–88) ----------
@@ -525,13 +519,13 @@ function FixturesTab() {
 // Squad data: each player's 6 teams with flags (emoji) and current points
 const SQUAD_DATA = [
   { name: "Lottie",  teams: [{ f:"🇲🇽", n:"Mexico", p:9 },{ f:"🇳🇱", n:"Netherlands", p:7 },{ f:"🇲🇦", n:"Morocco", p:7 },{ f:"🇦🇷", n:"Argentina", p:6 },{ f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", n:"England", p:4 },{ f:"🇵🇾", n:"Paraguay", p:4 }] },
-  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:7 },{ f:"🇦🇺", n:"Australia", p:4 },{ f:"🇨🇮", n:"Ivory Coast", p:6 },{ f:"🇸🇦", n:"Saudi Arabia", p:1 },{ f:"🇧🇦", n:"Bosnia", p:4 }] },
+  { name: "Tom",     teams: [{ f:"🇺🇸", n:"USA", p:6 },{ f:"🇧🇷", n:"Brazil", p:7 },{ f:"🇦🇺", n:"Australia", p:4 },{ f:"🇨🇮", n:"Ivory Coast", p:6 },{ f:"🇸🇦", n:"Saudi Arabia", p:2 },{ f:"🇧🇦", n:"Bosnia", p:4 }] },
   { name: "Joanne",  teams: [{ f:"🇩🇪", n:"Germany", p:6 },{ f:"🇨🇦", n:"Canada", p:4 },{ f:"🇨🇴", n:"Colombia", p:6 },{ f:"🇿🇦", n:"South Africa", p:4 },{ f:"🇨🇼", n:"Curaçao", p:1 },{ f:"🇹🇳", n:"Tunisia", p:0 }] },
-  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:6 },{ f:"🇳🇴", n:"Norway", p:6 },{ f:"🇸🇪", n:"Sweden", p:4 },{ f:"🇪🇸", n:"Spain", p:4 },{ f:"🇺🇾", n:"Uruguay", p:2 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
-  { name: "Joe",     teams: [{ f:"🇯🇵", n:"Japan", p:5 },{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:2 },{ f:"🇮🇷", n:"Iran", p:2 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
+  { name: "Sam",     teams: [{ f:"🇫🇷", n:"France", p:9 },{ f:"🇳🇴", n:"Norway", p:6 },{ f:"🇸🇪", n:"Sweden", p:4 },{ f:"🇪🇸", n:"Spain", p:7 },{ f:"🇺🇾", n:"Uruguay", p:2 },{ f:"🇺🇿", n:"Uzbekistan", p:0 }] },
+  { name: "Joe",     teams: [{ f:"🇯🇵", n:"Japan", p:5 },{ f:"🇰🇷", n:"South Korea", p:3 },{ f:"🇧🇪", n:"Belgium", p:5 },{ f:"🇮🇷", n:"Iran", p:3 },{ f:"🇨🇩", n:"DR Congo", p:1 },{ f:"🇨🇿", n:"Czechia", p:1 }] },
   { name: "Darrell", teams: [{ f:"🇬🇭", n:"Ghana", p:4 },{ f:"🇨🇭", n:"Switzerland", p:7 },{ f:"🇵🇹", n:"Portugal", p:4 },{ f:"🇪🇨", n:"Ecuador", p:4 },{ f:"🇭🇹", n:"Haiti", p:0 },{ f:"🇵🇦", n:"Panama", p:0 }] },
-  { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:4 },{ f:"🇸🇳", n:"Senegal", p:0 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:3 }] },
-  { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:2 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:3 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:3 }] },
+  { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:3 },{ f:"🇪🇬", n:"Egypt", p:5 },{ f:"🇸🇳", n:"Senegal", p:3 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:3 }] },
+  { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:3 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:3 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:3 }] },
 ];
 
 function FlipCard({ player }) {
@@ -722,14 +716,14 @@ export default function SweepstakeDashboard() {
               <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 12px", textShadow: `0 0 8px ${GREEN}88` }}>Form Guide</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { name: "Lottie", emoji: "🔥", headline: "Out of sight", text: "Netherlands won Group F and Paraguay nicked a point, pushing Lottie to 37 and a nine-point lead. Mexico, Morocco and the Dutch are all through, Argentina are all but there, and even third-placed Paraguay should sneak into the last 32. This one is hers to lose." },
-                  { name: "Tom",    emoji: "⚡", headline: "Clear in second", text: "Another strong night. Ivory Coast took second in Group E and Australia drew to grab second in Group D — a +4 round that lifts Tom to 28. With USA topping their group and Brazil already through, he has a stack of qualified teams and a firm grip on second." },
-                  { name: "Sam",    emoji: "🥈", headline: "Quietly into third", text: "Sweden's draw with Japan nudged Sam to 22 and a lone third. France and Norway are safely through and meet tonight in the Group I decider, with Spain still to play. A low-drama campaign — now he needs his big names to fire when the knockouts arrive." },
-                  { name: "Joanne", emoji: "📈", headline: "Stuck on 21", text: "A flat night that only confirmed the obvious: Germany are through as group winners, while Curaçao and Tunisia finished bottom and are out. Joanne holds on 21 — but with Germany, Colombia, Canada and South Africa all qualified, she has four teams in the last 32, more than anyone." },
-                  { name: "Darrell",emoji: "🚀", headline: "Still surging", text: "Ecuador's stunning upset of Germany earned Darrell another three and lifted him to 19. Switzerland topped their group, with Portugal and Ghana still alive. Haiti and Panama are long gone, but his climb from rock bottom to the edge of the top four has been the story of the week." },
-                  { name: "Joe",    emoji: "🤞", headline: "Inching up", text: "Japan's draw with Sweden sealed second in Group F and nudged Joe to 14, just ahead of Matt. Japan and third-placed South Korea are his live ones; Czechia are out. He needs his Group G pair, Belgium and Iran, to deliver tonight to keep climbing." },
-                  { name: "Matt",   emoji: "😴", headline: "Left behind", text: "No games again for Matt's teams, so he slips to seventh on 13, now behind Joe. Scotland and Austria cling to third-place hopes, but Senegal, Iraq and Algeria have offered little. His Group I and J sides play tonight — it's now or never to climb off the floor." },
-                  { name: "Karina", emoji: "🌱", headline: "A pulse", text: "Türkiye signed off with a shock 3-2 win over the USA — too late to save themselves, as they finished bottom and are out, but it earned Karina three points and lifted her into double figures at 10. Croatia and Cape Verde, both chasing third spots, are her last real hopes." },
+                  { name: "Lottie", emoji: "🔥", headline: "Lead trimmed but intact", text: "A rare quiet round — none of Lottie's six were in Groups G–I — so she holds on 37 as Tom and Sam both surged. The cushion is down to eight over Tom. Argentina and England both close out their groups tonight, so she can stretch it straight back out again." },
+                  { name: "Tom",    emoji: "😅", headline: "Clinging to second", text: "Just a single point from Saudi Arabia's goalless draw before they bowed out, but enough to edge Tom to 29 and keep him second — though Sam's charge cuts the gap to one. Brazil, USA, Ivory Coast and Australia are all safely through. He'll be watching Sam nervously." },
+                  { name: "Sam",    emoji: "🚀", headline: "Flying up the table", text: "The night's big winner. France battered Norway 4-1 with a Dembélé hat-trick and Spain edged Uruguay — two wins worth +6, rocketing Sam to 28 and right onto Tom's heels. France and Spain topped their groups, Norway are through second. Real title firepower and momentum." },
+                  { name: "Joanne", emoji: "⏸️", headline: "Waiting on the knockouts", text: "No games for her teams, so Joanne stays on 21 and slips to fourth as Sam flew past. Germany, Canada and South Africa are all safely through, and only Colombia — who close their group tonight — can still add to her group tally. From here it's about how deep her four runners go." },
+                  { name: "Darrell",emoji: "😐", headline: "Treads water", text: "A blank round leaves Darrell on 19 with the pack closing in. Switzerland topped their group and Ecuador are likely through as a third. Crucially, Portugal and Ghana both play tonight — wins there would revive his climb. Haiti and Panama remain dead weight." },
+                  { name: "Joe",    emoji: "📈", headline: "Climbing at last", text: "A strong night. Belgium thrashed New Zealand 5-1 to win Group G and Iran's draw chipped in another — +4 to reach 18. Belgium and Japan are through, with South Korea hanging on as a third-placed side. DR Congo play their finale tonight; Joe is finally on the move." },
+                  { name: "Matt",   emoji: "🧗", headline: "Off the floor", text: "Matt's best night yet. Senegal demolished Iraq 5-0 and Egypt's draw added one more — +4 to 17. Egypt are through in second, while Senegal and Scotland chase third-place spots. Austria and Algeria play their grudge match tonight with a knockout place at stake." },
+                  { name: "Karina", emoji: "🌱", headline: "A story to savour", text: "Cape Verde's history-making goalless draw sealed a stunning second place in Group H — the smallest nation ever to reach the World Cup knockouts — and earned Karina a point, up to 11. New Zealand bowed out, but Croatia still play tonight. Bottom, but with plenty to enjoy." },
                 ].map((p, i) => {
                   const player = PLAYERS.find(pl => pl.name === p.name);
                   const col = player?.color || "#666";
