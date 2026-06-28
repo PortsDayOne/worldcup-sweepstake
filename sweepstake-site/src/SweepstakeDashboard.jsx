@@ -3,11 +3,14 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { PLAYERS, PROGRESSION, RECENT, LAST_UPDATED } from "./data.js";
 import { GROUPS, OWNERS, PLAYER_COLORS, STRENGTH } from "./groups.js";
 
-const NAVY = "#0E1A2E";
-const NAVY2 = "#16243F";
-const GOLD = "#F0C446";
-const GREEN = "#40C6A0";
-const INK_SUB = "#8694AC";
+const NAVY = "#060B16";
+const NAVY2 = "#101E38";
+const GOLD = "#FFD23F";
+const GREEN = "#1DF0A5";
+const INK_SUB = "#8FA2C0";
+const MAGENTA = "#FF2E88";
+const CYAN = "#22E0F0";
+const VIOLET = "#9B6BFF";
 
 // Auto-derived from current standings — never hand-maintained.
 // CONFIRMED = clinched a top-2 group place (guaranteed knockout, ignoring any favourable
@@ -442,74 +445,95 @@ function BracketSlot({ slot, matchNum, side, top }) {
   const isLoser = res && team && !isWinner;
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 6, height: 26, padding: "0 8px",
-      borderBottom: top ? "1px solid rgba(255,255,255,0.05)" : "none",
+      display: "flex", alignItems: "center", gap: 6, height: 23, padding: "0 7px",
+      borderTop: top ? "none" : "1px solid rgba(255,255,255,0.06)",
       borderLeft: `3px solid ${team ? col : "transparent"}`,
-      opacity: isLoser ? 0.4 : 1,
+      background: isWinner ? `${col}1c` : "transparent",
+      opacity: isLoser ? 0.38 : 1,
     }}>
       <span style={{
         flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-        color: team ? "#fff" : "#5C6B82", fontSize: 12, fontWeight: isWinner ? 800 : team ? 600 : 400,
+        color: team ? "#fff" : "#566679", fontSize: 11.5, fontWeight: isWinner ? 900 : team ? 600 : 400,
         fontStyle: team ? "normal" : "italic",
       }}>{team || label}</span>
-      {owner && <span style={{ width: 6, height: 6, borderRadius: "50%", background: col, flexShrink: 0, boxShadow: `0 0 5px ${col}` }} />}
-      {score != null && <span style={{ color: isWinner ? GOLD : INK_SUB, fontSize: 12, fontWeight: 800, minWidth: 10, textAlign: "right" }}>{score}</span>}
+      {owner && <span style={{ width: 6, height: 6, borderRadius: "50%", background: col, flexShrink: 0, boxShadow: `0 0 6px ${col}` }} />}
+      {score != null && <span style={{ color: isWinner ? GOLD : INK_SUB, fontSize: 12, fontWeight: 900, minWidth: 9, textAlign: "right" }}>{score}</span>}
     </div>
   );
 }
 
 function BracketCard({ match, accent }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <span style={{ color: "#3D4A5E", fontSize: 8.5, fontWeight: 700, letterSpacing: 0.5, marginBottom: 2 }}>
-        {match.date} · {match.time}
-      </span>
-      <div style={{
-        width: "100%", background: NAVY2, borderRadius: 9, overflow: "hidden",
-        border: `1px solid ${accent ? GOLD + "66" : "rgba(255,255,255,0.09)"}`,
-        boxShadow: accent ? `0 0 16px ${GOLD}33` : "0 2px 8px rgba(0,0,0,0.25)",
-      }}>
-        <BracketSlot slot={match.a} matchNum={match.m} side="a" top />
-        <BracketSlot slot={match.b} matchNum={match.m} side="b" />
+    <div style={{
+      width: "100%", background: `linear-gradient(180deg, ${NAVY2}, #0a1424)`, borderRadius: 9, overflow: "hidden",
+      border: `1px solid ${accent ? GOLD + "88" : "rgba(255,255,255,0.11)"}`,
+      boxShadow: accent ? `0 0 22px ${GOLD}55` : "0 3px 12px rgba(0,0,0,0.4)",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "2px 7px", background: "rgba(255,255,255,0.035)" }}>
+        <span style={{ color: accent ? GOLD : GREEN, fontSize: 8, fontWeight: 900, letterSpacing: 0.5 }}>M{match.m}</span>
+        <span style={{ color: "#46566F", fontSize: 8, fontWeight: 600 }}>{match.date} · {match.time}</span>
       </div>
+      <BracketSlot slot={match.a} matchNum={match.m} side="a" top />
+      <BracketSlot slot={match.b} matchNum={match.m} side="b" />
     </div>
   );
 }
 
 function BracketTab() {
   const rounds = [
-    { key: "R32",   label: "Round of 32",   matches: KO.R32 },
-    { key: "R16",   label: "Round of 16",   matches: KO.R16 },
-    { key: "QF",    label: "Quarter-finals",matches: KO.QF },
-    { key: "SF",    label: "Semi-finals",   matches: KO.SF },
-    { key: "Final", label: "Final",         matches: KO.Final },
+    { key: "R32",   label: "Round of 32",    matches: KO.R32 },
+    { key: "R16",   label: "Round of 16",    matches: KO.R16 },
+    { key: "QF",    label: "Quarter-finals", matches: KO.QF },
+    { key: "SF",    label: "Semi-finals",    matches: KO.SF },
+    { key: "Final", label: "Final",          matches: KO.Final },
   ];
-  const COL_H = KO.R32.length * 70; // total tree height; later rounds centre within it
-  const COL_W = { R32: 168, R16: 158, QF: 158, SF: 158, Final: 170 };
+  const BASE = 80, GAP = 20;
+  const TREE_H = KO.R32.length * BASE;
+  const COL_W = { R32: 172, R16: 162, QF: 162, SF: 162, Final: 176 };
+  const line = `${GREEN}66`, lineSh = `0 0 6px ${GREEN}66`;
   return (
     <div style={{ marginBottom: 16 }}>
       <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 4px", lineHeight: 1.6 }}>
-        The road to the final. Swipe sideways to follow each path; every team carries its owner's colour. Scores and winners fill in as the knockouts are played.
+        The road to the final. Swipe sideways to follow each path — every team carries its owner's colour, and scores fill in as the knockouts play out.
       </p>
-      <p style={{ color: "#3D4A5E", fontSize: 10.5, margin: "0 0 12px" }}>← swipe to see later rounds →</p>
-      <div style={{ overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch", paddingBottom: 10 }}>
-        <div style={{ display: "flex", gap: 16, height: COL_H, minWidth: "max-content" }}>
-          {rounds.map(r => (
-            <div key={r.key} style={{ display: "flex", flexDirection: "column", width: COL_W[r.key], flexShrink: 0 }}>
-              <div style={{
-                textAlign: "center", marginBottom: 6, padding: "5px 0", borderRadius: 7,
-                background: r.key === "Final" ? `linear-gradient(90deg, ${GOLD}22, ${GOLD}11)` : "rgba(64,198,160,0.08)",
-                color: r.key === "Final" ? GOLD : GREEN, fontSize: 10.5, fontWeight: 800,
-                letterSpacing: 1, textTransform: "uppercase",
-                border: `1px solid ${r.key === "Final" ? GOLD + "44" : "rgba(64,198,160,0.18)"}`,
+      <p style={{ color: GREEN, fontSize: 10.5, fontWeight: 700, margin: "0 0 12px", letterSpacing: 1, textTransform: "uppercase", opacity: 0.85 }}>‹ swipe across the bracket ›</p>
+      <div style={{ overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch", paddingBottom: 12 }}>
+        <div style={{ minWidth: "max-content" }}>
+          <div style={{ display: "flex", gap: GAP, marginBottom: 8 }}>
+            {rounds.map(r => (
+              <div key={r.key} style={{
+                width: COL_W[r.key], flexShrink: 0, textAlign: "center", padding: "6px 0", borderRadius: 8,
+                background: r.key === "Final" ? `linear-gradient(90deg, ${GOLD}2a, ${GOLD}10)` : `linear-gradient(90deg, ${GREEN}22, ${GREEN}0a)`,
+                color: r.key === "Final" ? GOLD : GREEN, fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase",
+                border: `1px solid ${r.key === "Final" ? GOLD + "66" : GREEN + "44"}`, boxShadow: `0 0 16px ${(r.key === "Final" ? GOLD : GREEN)}26`,
               }}>{r.key === "Final" ? "🏆 Final" : r.label}</div>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-around" }}>
-                {r.matches.map(match => (
-                  <BracketCard key={match.m} match={match} accent={r.key === "Final"} />
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: GAP, height: TREE_H }}>
+            {rounds.map((r, ri) => {
+              const cellH = BASE * Math.pow(2, ri);
+              const notLast = ri < rounds.length - 1;
+              return (
+                <div key={r.key} style={{ width: COL_W[r.key], flexShrink: 0, display: "flex", flexDirection: "column" }}>
+                  {r.matches.map((match, idx) => {
+                    const topCell = idx % 2 === 0;
+                    return (
+                      <div key={match.m} style={{ height: cellH, position: "relative", display: "flex", alignItems: "center" }}>
+                        <BracketCard match={match} accent={r.key === "Final"} />
+                        {notLast && (
+                          <>
+                            <div style={{ position: "absolute", left: "100%", top: "calc(50% - 1px)", width: GAP / 2, height: 2, background: line, boxShadow: lineSh }} />
+                            <div style={{ position: "absolute", left: `calc(100% + ${GAP / 2 - 1}px)`, top: topCell ? "50%" : 0, height: "50%", width: 2, background: line, boxShadow: lineSh }} />
+                            {topCell && <div style={{ position: "absolute", left: `calc(100% + ${GAP / 2}px)`, top: "calc(100% - 1px)", width: GAP / 2, height: 2, background: line, boxShadow: lineSh }} />}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
@@ -722,6 +746,119 @@ function SquadsTab() {
   );
 }
 
+const FX_CSS = `
+@keyframes wcFloat { 0%{transform:translateY(30px) rotate(0deg);opacity:0} 8%{opacity:.16} 92%{opacity:.16} 100%{transform:translateY(-112vh) rotate(560deg);opacity:0} }
+@keyframes wcPulse { 0%,100%{opacity:.30;transform:scale(1)} 50%{opacity:.62;transform:scale(1.1)} }
+@keyframes wcShine { 0%{background-position:-150% 0} 55%,100%{background-position:160% 0} }
+@keyframes wcBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes wcSpin { to{transform:rotate(360deg)} }
+@keyframes wcRing { 0%{transform:scale(.7);opacity:.65} 100%{transform:scale(2.4);opacity:0} }
+@keyframes wcFade { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes wcGlow { 0%,100%{filter:drop-shadow(0 0 4px currentColor)} 50%{filter:drop-shadow(0 0 14px currentColor)} }
+`;
+
+function GlobalFX() {
+  const balls = [
+    { l: "5%", s: 26, d: 18, delay: 0 }, { l: "19%", s: 15, d: 24, delay: 6 },
+    { l: "37%", s: 34, d: 21, delay: 10 }, { l: "54%", s: 18, d: 27, delay: 3 },
+    { l: "69%", s: 24, d: 20, delay: 14 }, { l: "83%", s: 14, d: 25, delay: 8 },
+    { l: "93%", s: 30, d: 22, delay: 12 },
+  ];
+  return (
+    <>
+      <style>{FX_CSS}</style>
+      <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
+        <div style={{ position: "absolute", top: "-12%", left: "-12%", width: "62vw", height: "62vw", borderRadius: "50%", background: `radial-gradient(circle, ${GREEN}26, transparent 62%)`, filter: "blur(46px)", animation: "wcPulse 9s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", bottom: "-16%", right: "-12%", width: "58vw", height: "58vw", borderRadius: "50%", background: `radial-gradient(circle, ${MAGENTA}22, transparent 62%)`, filter: "blur(48px)", animation: "wcPulse 11s ease-in-out infinite 2s" }} />
+        <div style={{ position: "absolute", top: "28%", right: "18%", width: "42vw", height: "42vw", borderRadius: "50%", background: `radial-gradient(circle, ${VIOLET}1f, transparent 62%)`, filter: "blur(54px)", animation: "wcPulse 13s ease-in-out infinite 4s" }} />
+        {balls.map((b, i) => (
+          <span key={i} style={{ position: "absolute", left: b.l, bottom: "-44px", fontSize: b.s, animation: `wcFloat ${b.d}s linear infinite ${b.delay}s` }}>⚽</span>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// Synthesised referee whistle via Web Audio — peep-peep-peeeep, no asset needed.
+function playWhistle() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const now = ctx.currentTime;
+    const chirp = (start, dur, peak = 0.15) => {
+      const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = 2300;
+      const o2 = ctx.createOscillator(); o2.type = "triangle"; o2.frequency.value = 2312;
+      const lfo = ctx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 26;
+      const lfoG = ctx.createGain(); lfoG.gain.value = 85;
+      lfo.connect(lfoG); lfoG.connect(o.frequency); lfoG.connect(o2.frequency);
+      const g = ctx.createGain(); g.gain.value = 0;
+      o.connect(g); o2.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(peak, start + 0.015);
+      g.gain.setValueAtTime(peak, start + dur - 0.05);
+      g.gain.linearRampToValueAtTime(0, start + dur);
+      [o, o2, lfo].forEach(n => { n.start(start); n.stop(start + dur); });
+    };
+    chirp(now, 0.15); chirp(now + 0.23, 0.15); chirp(now + 0.46, 0.55);
+    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 1700);
+  } catch (e) {}
+}
+
+// Is a squad team (short name) still alive? ELIMINATED holds groups.js spellings.
+function teamAlive(shortName) {
+  const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  for (const n of ELIMINATED) {
+    if (n === shortName || TEAM_ALIASES[n] === shortName) return false;
+    if (norm(TEAM_ALIASES[n] || n) === norm(shortName)) return false;
+  }
+  return true;
+}
+
+function PlayersTab() {
+  const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>
+        Who's still got firepower. <span style={{ color: "#fff" }}>Bright</span> = still alive in the tournament; dimmed and struck through = knocked out.
+      </p>
+      {ranked.map(p => {
+        const squad = SQUAD_DATA.find(s => s.name === p.name);
+        const teams = squad ? squad.teams : [];
+        const alive = teams.filter(t => teamAlive(t.n)).length;
+        return (
+          <div key={p.name} style={{ background: NAVY2, border: `1px solid ${p.color}3a`, borderLeft: `4px solid ${p.color}`, borderRadius: 14, padding: "12px 14px", marginBottom: 10, boxShadow: `0 0 18px ${p.color}16`, animation: "wcFade 0.4s ease both" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <span style={{ color: p.color, fontSize: 15, fontWeight: 900, textShadow: `0 0 9px ${p.color}99` }}>{p.name}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ color: "#fff", fontSize: 13, fontWeight: 800 }}>{alive}<span style={{ color: INK_SUB, fontWeight: 600 }}>/6 in</span></span>
+                <span style={{ color: GOLD, fontSize: 14, fontWeight: 900, textShadow: `0 0 9px ${GOLD}` }}>{p.total}<span style={{ fontSize: 9, color: INK_SUB, fontWeight: 600 }}> pts</span></span>
+              </span>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {teams.map(t => {
+                const live = teamAlive(t.n);
+                return (
+                  <span key={t.n} style={{
+                    display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 20,
+                    background: live ? `${p.color}1f` : "rgba(255,255,255,0.025)",
+                    border: `1px solid ${live ? p.color + "66" : "rgba(255,255,255,0.06)"}`,
+                    opacity: live ? 1 : 0.4,
+                    boxShadow: live ? `0 0 10px ${p.color}22` : "none",
+                  }}>
+                    <span style={{ fontSize: 14, filter: live ? "none" : "grayscale(1)" }}>{t.f}</span>
+                    <span style={{ color: live ? "#fff" : INK_SUB, fontSize: 11.5, fontWeight: live ? 700 : 500, textDecoration: live ? "none" : "line-through" }}>{t.n}</span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function SweepstakeDashboard() {
   const [view, setView] = useState("knockouts");
   const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
@@ -730,20 +867,27 @@ export default function SweepstakeDashboard() {
   const remaining = teamMap(t => Math.max(0, 3 - t.gp));
   const ptsLeftFor = (name) => Object.keys(OWNERS).filter(t => OWNERS[t] === name).reduce((s, t) => s + (remaining[t] || 0), 0) * 3;
 
+  // Referee whistle on the first tap (browsers block audio before a user gesture,
+  // so this fires the moment the page is touched — effectively on open).
+  useEffect(() => {
+    let played = false;
+    const blow = () => { if (played) return; played = true; playWhistle(); window.removeEventListener("pointerdown", blow); };
+    window.addEventListener("pointerdown", blow);
+    return () => window.removeEventListener("pointerdown", blow);
+  }, []);
+
   const tabs = [
-    { id: "knockouts",   label: "Knockouts" },
-    { id: "standings",   label: "Standings" },
-    { id: "winindex",    label: "Win %" },
-    { id: "fixtures",    label: "Fixtures" },
-    { id: "squads",      label: "Squads" },
-    { id: "progression", label: "Progress" },
-    { id: "groups",      label: "Groups" },
-    { id: "topteams",    label: "Top Teams" },
+    { id: "knockouts", label: "Knockouts" },
+    { id: "standings", label: "Standings" },
+    { id: "winindex",  label: "Win %" },
+    { id: "players",   label: "Players" },
+    { id: "fixtures",  label: "Fixtures" },
   ];
 
   return (
-    <div style={{ background: `linear-gradient(160deg, ${NAVY} 0%, ${NAVY2} 100%)`, minHeight: "100vh", fontFamily: "'Inter','Helvetica Neue',sans-serif", padding: "20px 16px", display: "flex", justifyContent: "center" }}>
-      <div style={{ width: "100%", maxWidth: 760 }}>
+    <div style={{ background: `radial-gradient(ellipse at 50% -20%, #0c1a30 0%, ${NAVY} 55%)`, minHeight: "100vh", fontFamily: "'Inter','Helvetica Neue',sans-serif", padding: "20px 16px", display: "flex", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+      <GlobalFX />
+      <div style={{ width: "100%", maxWidth: 760, position: "relative", zIndex: 1 }}>
 
         {integrityIssues.length > 0 && (
           <div style={{ background: "rgba(240,196,70,0.12)", border: "1px solid rgba(240,196,70,0.5)", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
@@ -757,14 +901,30 @@ export default function SweepstakeDashboard() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
           <div>
-            <p style={{ color: GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 4px", textShadow: `0 0 8px ${GREEN}88` }}>World Cup 2026</p>
-            <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 900, margin: 0, letterSpacing: -1, lineHeight: 1 }}>Sweepstake</h1>
+            <p style={{ color: GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", margin: "0 0 4px", textShadow: `0 0 10px ${GREEN}`, animation: "wcGlow 3s ease-in-out infinite" }}>World Cup 2026</p>
+            <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: 8, lineHeight: 1 }}>
+              <span style={{
+                fontSize: 31, fontWeight: 900, letterSpacing: -1,
+                background: `linear-gradient(100deg, #fff 20%, ${GREEN} 40%, #fff 55%, ${CYAN} 70%, #fff 85%)`,
+                backgroundSize: "200% 100%", WebkitBackgroundClip: "text", backgroundClip: "text",
+                WebkitTextFillColor: "transparent", animation: "wcShine 6s linear infinite",
+              }}>Sweepstake</span>
+              <span style={{ display: "inline-block", fontSize: 26, animation: "wcBob 2.4s ease-in-out infinite", filter: `drop-shadow(0 0 8px ${GOLD})` }}>🏆</span>
+            </h1>
             <p style={{ color: INK_SUB, fontSize: 12, margin: "6px 0 0" }}>Updated {LAST_UPDATED}</p>
           </div>
-          <div style={{ textAlign: "right", background: "rgba(240,196,70,0.07)", border: "1px solid rgba(240,196,70,0.2)", borderRadius: 14, padding: "10px 14px", boxShadow: "0 0 20px rgba(240,196,70,0.1)" }}>
-            <p style={{ color: GREEN, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 2px" }}>Leader</p>
-            <p style={{ color: "#fff", fontSize: 20, fontWeight: 900, margin: 0 }}><Trophy />{leader.name}</p>
-            <p style={{ color: GOLD, fontSize: 15, fontWeight: 700, margin: 0, textShadow: `0 0 10px ${GOLD}` }}>{leader.total} pts</p>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            <button onClick={playWhistle} aria-label="Whistle" style={{
+              alignSelf: "flex-end", width: 34, height: 34, borderRadius: "50%", cursor: "pointer",
+              border: `1px solid ${GREEN}55`, background: `${GREEN}14`, color: GREEN, fontSize: 15,
+              display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 12px ${GREEN}33`,
+            }}>🔊</button>
+            <div style={{ position: "relative", textAlign: "right", background: `linear-gradient(135deg, ${GOLD}1c, ${GOLD}08)`, border: `1px solid ${GOLD}55`, borderRadius: 14, padding: "10px 14px", boxShadow: `0 0 26px ${GOLD}2e`, overflow: "hidden" }}>
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 70% 30%, ${GOLD}22, transparent 60%)`, animation: "wcPulse 4s ease-in-out infinite", pointerEvents: "none" }} />
+              <p style={{ color: GREEN, fontSize: 10, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 2px", position: "relative" }}>Leader</p>
+              <p style={{ color: "#fff", fontSize: 20, fontWeight: 900, margin: 0, position: "relative" }}><Trophy />{leader.name}</p>
+              <p style={{ color: GOLD, fontSize: 15, fontWeight: 800, margin: 0, textShadow: `0 0 12px ${GOLD}`, position: "relative" }}>{leader.total} pts <span style={{ color: INK_SUB, fontSize: 11, fontWeight: 600 }}>· +{leader.total - ranked[1].total}</span></p>
+            </div>
           </div>
         </div>
 
@@ -796,7 +956,7 @@ export default function SweepstakeDashboard() {
         {/* Tab content with fade animation */}
         <TabPanel key={view}>
           {/* Charts */}
-          {(view === "standings" || view === "progression") && (
+          {view === "standings" && (
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 10px 12px 0", marginBottom: 16 }}>
               {view === "standings" ? (
                 <ResponsiveContainer width="100%" height={280}>
@@ -823,37 +983,6 @@ export default function SweepstakeDashboard() {
             </div>
           )}
 
-          {/* Player narrative commentary — progression tab only */}
-          {view === "progression" && (
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 12px", textShadow: `0 0 8px ${GREEN}88` }}>Form Guide</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {[
-                  { name: "Lottie", emoji: "🔥", headline: "Runaway leader", text: "The group stage ends with Lottie miles clear on 43 — a 14-point lead. Argentina and England both won their groups to cap a flawless round, joining Mexico, Morocco and the Netherlands. The kicker: all six of her teams reached the knockouts. Utterly dominant." },
-                  { name: "Tom",    emoji: "🥈", headline: "Holds second", text: "A blank final round, but Tom's earlier work keeps him second on 29. Brazil, USA, Ivory Coast and Australia are through, and Bosnia squeezed in as a best third — five of his six in the last 32. Only Saudi Arabia fell. A strong base, but Sam is breathing down his neck." },
-                  { name: "Sam",    emoji: "🚀", headline: "The danger man", text: "One point off Tom on 28, and arguably the best placed of anyone: France and Spain both stormed their groups and are among the favourites. Norway and Sweden are through too. Only Uzbekistan and Uruguay fell. Four teams in the knockouts — keep an eye on his Win %." },
-                  { name: "Joanne", emoji: "📊", headline: "Best of the rest", text: "Colombia's draw to top Group K nudged Joanne to 22 and fourth. Germany, Canada and South Africa are also through — four qualifiers in all. One quirk: her South Africa play her Canada in the last 32, so she's guaranteed a team in the last 16 but must lose one too." },
-                  { name: "Joe",    emoji: "📈", headline: "Surged at the death", text: "A brilliant finish — DR Congo's 3-1 comeback over Uzbekistan sent them through as a third-placed side and lifted Joe to 21 and fifth. Belgium and Japan are also in. The cruelty: both South Korea and Iran finished third in their groups and still missed the cut." },
-                  { name: "Darrell",emoji: "😐", headline: "Pipped to fifth", text: "Plenty through — Switzerland topped Group B, Portugal took second in K, and Ecuador and Ghana both snuck in as best thirds: four in the last 32. But a flat final round let Joe nip above him to 20. Haiti and Panama, predictably, bowed out." },
-                  { name: "Matt",   emoji: "🧗", headline: "Climbed hard", text: "Austria and Algeria both drew their finale and scraped through — Austria second, Algeria a best third — adding to Matt's 19. Egypt and Senegal are in too: four qualifiers. Only Iraq and third-placed Scotland missed out. A big late climb, even if he sits seventh." },
-                  { name: "Karina", emoji: "🌱", headline: "Still swinging", text: "Croatia's win over Ghana to take second in Group L handed Karina a vital +3, up to 14. With Cape Verde's fairytale second place, she has two through to the last 32. Türkiye, Qatar, New Zealand and Jordan are all out — but Croatia and Cape Verde give her a puncher's chance." },
-                ].map((p, i) => {
-                  const player = PLAYERS.find(pl => pl.name === p.name);
-                  const col = player?.color || "#666";
-                  return (
-                    <div key={p.name} style={{ background: NAVY2, border: `1px solid ${col}33`, borderLeft: `3px solid ${col}`, borderRadius: 12, padding: "12px 14px", boxShadow: `0 0 12px ${col}11` }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-                        <span style={{ fontSize: 16 }}>{p.emoji}</span>
-                        <span style={{ color: col, fontSize: 13, fontWeight: 800, textShadow: `0 0 6px ${col}88` }}>{p.name}</span>
-                        <span style={{ color: col, fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", opacity: 0.8 }}>— {p.headline}</span>
-                      </div>
-                      <p style={{ color: "#B6C2D6", fontSize: 12.5, margin: 0, lineHeight: 1.65 }}>{p.text}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Standings list */}
           {view === "standings" && (
@@ -912,18 +1041,10 @@ export default function SweepstakeDashboard() {
             </>
           )}
 
-          {view === "groups" && (
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>Top 2 advance automatically. Best 8 third-placed also qualify. Green bar = qualifying. Dotted line = elimination cut-off.</p>
-              {GROUPS.map(g => <GroupCard key={g.name} group={g} />)}
-            </div>
-          )}
-
           {view === "fixtures" && <FixturesTab />}
           {view === "winindex" && <WinIndexTab />}
           {view === "knockouts" && <BracketTab />}
-          {view === "topteams" && <TopTeams />}
-          {view === "squads" && <SquadsTab />}
+          {view === "players" && <PlayersTab />}
         </TabPanel>
 
         {/* Scoring key */}
