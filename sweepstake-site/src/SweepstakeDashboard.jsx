@@ -759,6 +759,10 @@ const FX_CSS = `
 @keyframes wcConfetti { 0%{transform:translateY(0) rotate(0);opacity:0} 8%{opacity:1} 100%{transform:translateY(110vh) rotate(560deg);opacity:.9} }
 @keyframes wcBurst { 0%{transform:translateY(0) scale(.3);opacity:0} 18%{opacity:1} 100%{transform:translateY(-170px) scale(1);opacity:0} }
 @keyframes wcIntroFade { 0%{opacity:0} 5%{opacity:1} 86%{opacity:1} 100%{opacity:0;visibility:hidden} }
+@keyframes wcSlowZoom { 0%{transform:scale(.88)} 100%{transform:scale(1.32)} }
+@keyframes wcSpark { 0%{transform:scale(0) rotate(0);opacity:0} 30%{transform:scale(1.5) rotate(45deg);opacity:1} 100%{transform:scale(.5) rotate(95deg);opacity:0} }
+@keyframes wcStreak { 0%{opacity:0} 12%{opacity:1} 24%{opacity:.25} 38%{opacity:1} 100%{opacity:0} }
+@keyframes wcZapRing { 0%{transform:scale(.4);opacity:.9} 100%{transform:scale(2.5);opacity:0} }
 `;
 
 function GlobalFX() {
@@ -816,8 +820,10 @@ function TrophyIntro({ onDone }) {
           <span style={{ display: "inline-block", fontSize: 18, animation: `wcBurst 1.7s ease-out ${0.35 + i * 0.04}s both` }}>⚽</span>
         </span>
       ))}
-      <div style={{ animation: "wcBob 2.6s ease-in-out infinite", position: "relative", zIndex: 2 }}>
-        <div style={{ fontSize: 112, lineHeight: 1, animation: "wcTrophyIn 1s cubic-bezier(.2,1.1,.3,1) both", filter: `drop-shadow(0 0 34px ${GOLD})` }}>🏆</div>
+      <div style={{ animation: "wcSlowZoom 5s ease-out both", position: "relative", zIndex: 2 }}>
+        <div style={{ animation: "wcBob 2.6s ease-in-out infinite" }}>
+          <div style={{ fontSize: 112, lineHeight: 1, animation: "wcTrophyIn 1s cubic-bezier(.2,1.1,.3,1) both", filter: `drop-shadow(0 0 34px ${GOLD})` }}>🏆</div>
+        </div>
       </div>
       <div style={{ marginTop: 14, position: "relative", zIndex: 2, animation: "wcFade 0.8s ease 0.5s both", textAlign: "center" }}>
         <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: 4, textTransform: "uppercase", color: GREEN, textShadow: `0 0 12px ${GREEN}` }}>FIFA World Cup 2026</p>
@@ -854,6 +860,106 @@ function playWhistle() {
     chirp(now, 0.15); chirp(now + 0.23, 0.15); chirp(now + 0.46, 0.55);
     setTimeout(() => { try { ctx.close(); } catch (e) {} }, 1700);
   } catch (e) {}
+}
+
+// Epic intro fanfare — referee whistle kickoff, then a triumphant brass swell
+// with timpani and a cymbal crash, fading out over ~4.5s to match the trophy intro.
+function playFanfare() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(0.55, now + 0.5);
+    master.gain.setValueAtTime(0.55, now + 3.4);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 4.7);
+    master.connect(ctx.destination);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 4200; lp.connect(master);
+    const f = n => 440 * Math.pow(2, (n - 69) / 12);
+    // kickoff whistle
+    const wo = ctx.createOscillator(); wo.type = "sine"; wo.frequency.value = 2300;
+    const wl = ctx.createOscillator(); wl.frequency.value = 26; const wlg = ctx.createGain(); wlg.gain.value = 80;
+    wl.connect(wlg); wlg.connect(wo.frequency);
+    const wg = ctx.createGain(); wg.gain.setValueAtTime(0, now); wg.gain.linearRampToValueAtTime(0.16, now + 0.02);
+    wg.gain.setValueAtTime(0.16, now + 0.4); wg.gain.linearRampToValueAtTime(0, now + 0.46);
+    wo.connect(wg); wg.connect(ctx.destination); wo.start(now); wo.stop(now + 0.46); wl.start(now); wl.stop(now + 0.46);
+    // brass chord
+    const chord = (notes, start, dur, gv = 0.15) => {
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(gv, start + 0.06);
+      g.gain.setValueAtTime(gv, start + dur - 0.1);
+      g.gain.linearRampToValueAtTime(0.0001, start + dur);
+      g.connect(lp);
+      notes.forEach(n => [-7, 7].forEach(det => {
+        const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f(n); o.detune.value = det;
+        o.connect(g); o.start(start); o.stop(start + dur);
+      }));
+    };
+    const boom = (start, n) => {
+      const o = ctx.createOscillator(); o.type = "sine";
+      o.frequency.setValueAtTime(f(n) * 2, start); o.frequency.exponentialRampToValueAtTime(f(n), start + 0.16);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.55, start); g.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
+      o.connect(g); g.connect(master); o.start(start); o.stop(start + 0.5);
+    };
+    const crash = (start, dur) => {
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+      const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 6000;
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, start);
+      g.gain.linearRampToValueAtTime(0.14, start + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      src.connect(hp); hp.connect(g); g.connect(master); src.start(start); src.stop(start + dur);
+    };
+    // Triumphant progression: Am → F → C → G → big C
+    const t = now + 0.5;
+    chord([57, 60, 64], t, 0.62); boom(t, 45);
+    chord([53, 57, 60], t + 0.62, 0.62); boom(t + 0.62, 41);
+    chord([60, 64, 67], t + 1.24, 0.62); boom(t + 1.24, 48);
+    chord([55, 59, 62], t + 1.86, 0.55); boom(t + 1.86, 43);
+    chord([60, 64, 67, 72], t + 2.45, 1.5, 0.19); boom(t + 2.45, 48); crash(t + 2.4, 1.7);
+    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 5400);
+  } catch (e) {}
+}
+
+// Short UI blip for tab changes.
+function playBlip() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC(); const now = ctx.currentTime;
+    const o = ctx.createOscillator(); o.type = "triangle";
+    o.frequency.setValueAtTime(440, now); o.frequency.exponentialRampToValueAtTime(920, now + 0.07);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, now);
+    g.gain.linearRampToValueAtTime(0.11, now + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
+    o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.14);
+    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 300);
+  } catch (e) {}
+}
+
+// Random coloured electric pops across the screen.
+function ElectricFX() {
+  const [bolts, setBolts] = useState([]);
+  useEffect(() => {
+    let id = 0;
+    const colors = [GREEN, MAGENTA, CYAN, VIOLET, GOLD];
+    const iv = setInterval(() => {
+      const b = { id: id++, top: 8 + Math.random() * 82, left: 6 + Math.random() * 86, color: colors[(Math.random() * colors.length) | 0], kind: (Math.random() * 3) | 0, rot: (Math.random() * 360) | 0 };
+      setBolts(p => [...p, b]);
+      setTimeout(() => setBolts(p => p.filter(x => x.id !== b.id)), 1200);
+    }, 1600);
+    return () => clearInterval(iv);
+  }, []);
+  return (
+    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 40, overflow: "hidden" }}>
+      {bolts.map(b => {
+        if (b.kind === 0) return <span key={b.id} style={{ position: "absolute", top: `${b.top}%`, left: `${b.left}%`, color: b.color, fontSize: 20, animation: "wcSpark 1.1s ease-out forwards", filter: `drop-shadow(0 0 9px ${b.color})` }}>✦</span>;
+        if (b.kind === 1) return <span key={b.id} style={{ position: "absolute", top: `${b.top}%`, left: `${b.left}%`, width: 64, height: 3, borderRadius: 3, background: `linear-gradient(90deg, transparent, ${b.color}, transparent)`, boxShadow: `0 0 12px ${b.color}`, transform: `rotate(${b.rot}deg)`, animation: "wcStreak 0.95s ease-out forwards" }} />;
+        return <span key={b.id} style={{ position: "absolute", top: `${b.top}%`, left: `${b.left}%`, width: 28, height: 28, borderRadius: "50%", border: `2px solid ${b.color}`, boxShadow: `0 0 12px ${b.color}`, animation: "wcZapRing 1s ease-out forwards" }} />;
+      })}
+    </div>
+  );
 }
 
 // Is a squad team (short name) still alive? ELIMINATED holds groups.js spellings.
@@ -952,13 +1058,13 @@ export default function SweepstakeDashboard() {
   const remaining = teamMap(t => Math.max(0, 3 - t.gp));
   const ptsLeftFor = (name) => Object.keys(OWNERS).filter(t => OWNERS[t] === name).reduce((s, t) => s + (remaining[t] || 0), 0) * 3;
 
-  // Referee whistle on the first tap (browsers block audio before a user gesture,
-  // so this fires the moment the page is touched — effectively on open).
+  // Epic fanfare on the first tap (browsers block audio before a gesture, so it
+  // fires the moment the page is touched — e.g. tapping to skip the intro).
   useEffect(() => {
     let played = false;
-    const blow = () => { if (played) return; played = true; playWhistle(); window.removeEventListener("pointerdown", blow); };
-    window.addEventListener("pointerdown", blow);
-    return () => window.removeEventListener("pointerdown", blow);
+    const go = () => { if (played) return; played = true; playFanfare(); window.removeEventListener("pointerdown", go); };
+    window.addEventListener("pointerdown", go);
+    return () => window.removeEventListener("pointerdown", go);
   }, []);
 
   const tabs = [
@@ -970,6 +1076,7 @@ export default function SweepstakeDashboard() {
   return (
     <div style={{ background: `radial-gradient(ellipse at 50% -20%, #0c1a30 0%, ${NAVY} 55%)`, minHeight: "100vh", fontFamily: "'Inter','Helvetica Neue',sans-serif", padding: "20px 16px", display: "flex", justifyContent: "center", position: "relative", overflow: "hidden" }}>
       <GlobalFX />
+      <ElectricFX />
       {intro && <TrophyIntro onDone={() => setIntro(false)} />}
       <div style={{ width: "100%", maxWidth: 760, position: "relative", zIndex: 1 }}>
 
@@ -997,7 +1104,7 @@ export default function SweepstakeDashboard() {
             </h1>
             <p style={{ color: INK_SUB, fontSize: 12, margin: "6px 0 0" }}>Updated {LAST_UPDATED}</p>
           </div>
-          <button onClick={playWhistle} aria-label="Whistle" style={{
+          <button onClick={playFanfare} aria-label="Play intro" style={{
             width: 38, height: 38, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
             border: `1px solid ${GREEN}66`, background: `${GREEN}18`, color: GREEN, fontSize: 17,
             display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 14px ${GREEN}44`,
@@ -1010,7 +1117,7 @@ export default function SweepstakeDashboard() {
             {tabs.map(t => {
               const active = view === t.id;
               return (
-                <button key={t.id} onClick={() => setView(t.id)} style={{
+                <button key={t.id} onClick={() => { playBlip(); setView(t.id); }} style={{
                   flex: 1, padding: "12px 8px", borderRadius: 12, cursor: "pointer",
                   fontSize: 12.5, fontWeight: 900, letterSpacing: 0.5, textTransform: "uppercase",
                   background: active ? `linear-gradient(135deg, ${GREEN}, ${CYAN})` : "rgba(255,255,255,0.05)",
