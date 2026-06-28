@@ -69,22 +69,21 @@ function ownerOf(team) {
 // Each component is taken as a share of the 8-player total, weighted, and summed,
 // so every player's % naturally adds up to 100. Eliminated teams contribute 0 title odds.
 function computeWinIndex() {
-  const titleEq = {}, through = {}, points = {};
+  const titleEq = {}, alive = {};
   const koOut = koLosers();
-  PLAYERS.forEach(p => { titleEq[p.name] = 0; through[p.name] = 0; points[p.name] = p.total; });
+  PLAYERS.forEach(p => { titleEq[p.name] = 0; alive[p.name] = 0; });
   GROUPS.forEach(g => g.teams.forEach(t => {
     const owner = ownerOf(t.name);
     if (!owner) return;
     const dead = ELIMINATED.has(t.name) || koOut.has(t.name);
-    if (!dead) titleEq[owner] += (STRENGTH[t.name] || 0);
-    if (CONFIRMED.has(t.name) && !koOut.has(t.name)) through[owner] += 1;
+    if (!dead) { titleEq[owner] += (STRENGTH[t.name] || 0); alive[owner] += 1; }
   }));
   const total = obj => Object.values(obj).reduce((a, b) => a + b, 0) || 1;
-  const sT = total(titleEq), sP = total(points), sThr = total(through);
-  const W_TITLE = 0.5, W_PTS = 0.3, W_THR = 0.2;
+  const sT = total(titleEq), sA = total(alive);
+  const W_TITLE = 0.65, W_ALIVE = 0.35;
   return PLAYERS.map(p => {
-    const share = W_TITLE * (titleEq[p.name] / sT) + W_PTS * (points[p.name] / sP) + W_THR * (through[p.name] / sThr);
-    return { name: p.name, color: p.color, pct: share * 100, titleEq: titleEq[p.name], points: points[p.name], through: through[p.name] };
+    const share = W_TITLE * (titleEq[p.name] / sT) + W_ALIVE * (alive[p.name] / sA);
+    return { name: p.name, color: p.color, pct: share * 100, titleEq: titleEq[p.name], alive: alive[p.name] };
   }).sort((a, b) => b.pct - a.pct);
 }
 
@@ -856,6 +855,7 @@ function playWhistle() {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
+    try { ctx.resume(); } catch (e) {}
     const now = ctx.currentTime;
     const chirp = (start, dur, peak = 0.15) => {
       const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = 2300;
@@ -883,6 +883,7 @@ function playFanfare() {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
+    try { ctx.resume(); } catch (e) {}
     const now = ctx.currentTime;
     const master = ctx.createGain();
     master.gain.setValueAtTime(0.0001, now);
@@ -935,7 +936,7 @@ function playBlip() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    const ctx = new AC(); const now = ctx.currentTime;
+    const ctx = new AC(); try { ctx.resume(); } catch (e) {} const now = ctx.currentTime;
     const o = ctx.createOscillator(); o.type = "triangle";
     o.frequency.setValueAtTime(440, now); o.frequency.exponentialRampToValueAtTime(920, now + 0.07);
     const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, now);
@@ -983,13 +984,13 @@ function teamAlive(shortName) {
 
 // One-line status per player — rewrite each update with what's just happened.
 const BLURBS = {
-  Lottie:  "Perfect group stage — all six teams through and 14 clear at the top.",
-  Tom:     "Second on the board with five of six still standing, Brazil leading.",
+  Lottie:  "All six teams still standing — no one has more of the board left.",
+  Tom:     "Five still alive and firing, Brazil heading the charge.",
   Sam:     "France and Spain alive make him the bookies' title favourite.",
   Joanne:  "Canada edged South Africa in the all-Joanne tie — into the last 16, but down to three.",
   Joe:     "Three sneaked into the knockouts after DR Congo's late escape.",
-  Darrell: "Four survivors led by Switzerland, but edged down to sixth.",
-  Matt:    "A big late climb leaves four of his teams still alive.",
+  Darrell: "Four survivors led by Switzerland and Portugal.",
+  Matt:    "Four teams still alive after a strong finish to the groups.",
   Karina:  "Down to two, but Croatia and Cape Verde keep her swinging.",
 };
 
@@ -997,12 +998,12 @@ function FieldTab() {
   const winIdx = computeWinIndex();
   const pctOf = Object.fromEntries(winIdx.map(r => [r.name, r.pct]));
   const maxPct = Math.max(...winIdx.map(r => r.pct));
-  const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
+  const ranked = winIdx.map(r => PLAYERS.find(p => p.name === r.name));
   const medal = ["#FFD23F", "#C8D2E0", "#E08A4B"];
   return (
     <div style={{ marginBottom: 16 }}>
       <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>
-        The field, by sweepstake points. <span style={{ color: GOLD }}>Win %</span> blends live title odds, points and teams through. Flags show who's <span style={{ color: "#fff" }}>alive</span> vs knocked out.
+        The field, by <span style={{ color: GOLD }}>Win %</span> — a blend of live title odds and how many teams each player has left. Flags show who's <span style={{ color: "#fff" }}>alive</span> vs knocked out.
       </p>
       {ranked.map((p, i) => {
         const squad = SQUAD_DATA.find(s => s.name === p.name);
@@ -1023,8 +1024,7 @@ function FieldTab() {
                 boxShadow: medal[i] ? `0 0 10px ${medal[i]}88` : "none",
               }}>{i + 1}</span>
               <span style={{ color: p.color, fontSize: 15, fontWeight: 900, textShadow: `0 0 9px ${p.color}99`, flex: 1 }}>{p.name}</span>
-              <span style={{ color: "#fff", fontSize: 13, fontWeight: 800 }}>{alive}<span style={{ color: INK_SUB, fontWeight: 600, fontSize: 11 }}>/6</span></span>
-              <span style={{ color: GOLD, fontSize: 14, fontWeight: 900, textShadow: `0 0 9px ${GOLD}`, minWidth: 48, textAlign: "right" }}>{p.total}<span style={{ fontSize: 9, color: INK_SUB, fontWeight: 600 }}> pts</span></span>
+              <span style={{ color: "#fff", fontSize: 13, fontWeight: 800 }}>{alive}<span style={{ color: INK_SUB, fontWeight: 600, fontSize: 11 }}>/6 in</span></span>
             </div>
             <p style={{ color: "#C2CEE2", fontSize: 11.5, margin: "0 0 8px", lineHeight: 1.5, fontStyle: "italic" }}>{BLURBS[p.name]}</p>
             {/* Win % bar */}
@@ -1061,12 +1061,6 @@ function FieldTab() {
 export default function SweepstakeDashboard() {
   const [view, setView] = useState("knockouts");
   const [intro, setIntro] = useState(true);
-  const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
-  const leader = ranked[0];
-  const integrityIssues = dataIntegrityIssues();
-  const remaining = teamMap(t => Math.max(0, 3 - t.gp));
-  const ptsLeftFor = (name) => Object.keys(OWNERS).filter(t => OWNERS[t] === name).reduce((s, t) => s + (remaining[t] || 0), 0) * 3;
-
   // Epic fanfare on the first tap (browsers block audio before a gesture, so it
   // fires the moment the page is touched — e.g. tapping to skip the intro).
   useEffect(() => {
@@ -1088,15 +1082,6 @@ export default function SweepstakeDashboard() {
       <ElectricFX />
       {intro && <TrophyIntro onDone={() => setIntro(false)} />}
       <div style={{ width: "100%", maxWidth: 760, position: "relative", zIndex: 1 }}>
-
-        {integrityIssues.length > 0 && (
-          <div style={{ background: "rgba(240,196,70,0.12)", border: "1px solid rgba(240,196,70,0.5)", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
-            <p style={{ color: GOLD, fontSize: 12, fontWeight: 800, margin: "0 0 4px", letterSpacing: 0.5 }}>⚠ Data check — standings don't reconcile</p>
-            {integrityIssues.map((msg, i) => (
-              <p key={i} style={{ color: "#E8D9A8", fontSize: 11.5, margin: "2px 0", lineHeight: 1.5 }}>{msg}</p>
-            ))}
-          </div>
-        )}
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
