@@ -157,28 +157,60 @@ const FIXTURES = [
   { date: "Sat 4 Jul",  time: "2:30am BST",home: "Colombia", away: "Ghana", group: "R32" }
 ];
 
-// ---------- Round of 32 bracket (official FIFA match numbers 73–88) ----------
-// Slots are codes: "1X"/"2X" = winner/runner-up of Group X (auto-resolves once that
-// group is finished); "3:..." = a third-place slot that stays a label until the best-8
-// thirds are assigned after the group stage. The bracket fills itself as groups complete.
-const R32 = [
-  { m: 73, date: "Sun 28 Jun", venue: "Los Angeles", a: "2A", b: "2B" },
-  { m: 76, date: "Mon 29 Jun", venue: "Houston",     a: "1C", b: "2F" },
-  { m: 74, date: "Mon 29 Jun", venue: "Boston",      a: "1E", b: "Paraguay" },
-  { m: 75, date: "Tue 30 Jun", venue: "Monterrey",   a: "1F", b: "2C" },
-  { m: 78, date: "Tue 30 Jun", venue: "Dallas",      a: "2E", b: "2I" },
-  { m: 77, date: "Tue 30 Jun", venue: "New Jersey",  a: "1I", b: "Sweden" },
-  { m: 79, date: "Wed 1 Jul",  venue: "Mexico City", a: "1A", b: "Ecuador" },
-  { m: 80, date: "Wed 1 Jul",  venue: "Atlanta",     a: "1L", b: "Congo DR" },
-  { m: 82, date: "Wed 1 Jul",  venue: "Seattle",     a: "1G", b: "Senegal" },
-  { m: 81, date: "Thu 2 Jul",  venue: "Santa Clara", a: "1D", b: "Bosnia-Herzegovina" },
-  { m: 83, date: "Thu 2 Jul",  venue: "Los Angeles", a: "1H", b: "2J" },
-  { m: 84, date: "Thu 2 Jul",  venue: "Vancouver",   a: "1B", b: "Algeria" },
-  { m: 85, date: "Thu 2 Jul",  venue: "Philadelphia",a: "2K", b: "2L" },
-  { m: 88, date: "Fri 3 Jul",  venue: "Dallas",      a: "2D", b: "2G" },
-  { m: 86, date: "Fri 3 Jul",  venue: "Miami",       a: "1J", b: "2H" },
-  { m: 87, date: "Fri 3 Jul",  venue: "Kansas City", a: "1K", b: "Ghana" },
-];
+// ---------- Full knockout bracket (official FIFA match numbers 73–104) ----------
+// Slot codes: "1X"/"2X" = group winner/runner-up, a bare team name = an assigned best-3rd,
+// "W##" = winner of match ##. Matches are listed top-to-bottom in true bracket order so the
+// columns line up into a tree. KO_RESULTS holds knockout scores as they're played:
+//   KO_RESULTS[73] = { as: 2, bs: 1 }            → winner is side A
+//   KO_RESULTS[73] = { as: 1, bs: 1, pens: "b" } → draw, side B wins on penalties
+// Add to it each update and every later round advances automatically.
+const KO = {
+  R32: [
+    { m:74, date:"Mon 29 Jun", time:"9:30pm", venue:"Boston",       a:"1E", b:"Paraguay" },
+    { m:77, date:"Tue 30 Jun", time:"10pm",   venue:"New Jersey",   a:"1I", b:"Sweden" },
+    { m:73, date:"Sun 28 Jun", time:"8pm",    venue:"Los Angeles",  a:"2A", b:"2B" },
+    { m:75, date:"Tue 30 Jun", time:"12am",   venue:"Monterrey",    a:"1F", b:"2C" },
+    { m:83, date:"Thu 2 Jul",  time:"8pm",    venue:"Los Angeles",  a:"1H", b:"2J" },
+    { m:84, date:"Fri 3 Jul",  time:"4am",    venue:"Vancouver",    a:"1B", b:"Algeria" },
+    { m:81, date:"Thu 2 Jul",  time:"1am",    venue:"Santa Clara",  a:"1D", b:"Bosnia-Herzegovina" },
+    { m:82, date:"Wed 1 Jul",  time:"9pm",    venue:"Seattle",      a:"1G", b:"Senegal" },
+    { m:76, date:"Mon 29 Jun", time:"6pm",    venue:"Houston",      a:"1C", b:"2F" },
+    { m:78, date:"Tue 30 Jun", time:"6pm",    venue:"Dallas",       a:"2E", b:"2I" },
+    { m:79, date:"Wed 1 Jul",  time:"12am",   venue:"Mexico City",  a:"1A", b:"Ecuador" },
+    { m:80, date:"Wed 1 Jul",  time:"5pm",    venue:"Atlanta",      a:"1L", b:"Congo DR" },
+    { m:86, date:"Fri 3 Jul",  time:"11pm",   venue:"Miami",        a:"1J", b:"2H" },
+    { m:88, date:"Fri 3 Jul",  time:"7pm",    venue:"Dallas",       a:"2D", b:"2G" },
+    { m:85, date:"Thu 2 Jul",  time:"12am",   venue:"Philadelphia", a:"2K", b:"2L" },
+    { m:87, date:"Sat 4 Jul",  time:"2:30am", venue:"Kansas City",  a:"1K", b:"Ghana" },
+  ],
+  R16: [
+    { m:89, date:"Sat 4 Jul",  time:"10pm", venue:"Philadelphia", a:"W74", b:"W77" },
+    { m:90, date:"Sat 4 Jul",  time:"6pm",  venue:"Houston",      a:"W73", b:"W75" },
+    { m:93, date:"Sat 4 Jul",  time:"8pm",  venue:"Dallas",       a:"W83", b:"W84" },
+    { m:94, date:"Sun 5 Jul",  time:"1am",  venue:"Seattle",      a:"W81", b:"W82" },
+    { m:91, date:"Sun 5 Jul",  time:"9pm",  venue:"New Jersey",   a:"W76", b:"W78" },
+    { m:92, date:"Mon 6 Jul",  time:"1am",  venue:"Mexico City",  a:"W79", b:"W80" },
+    { m:95, date:"Sun 5 Jul",  time:"5pm",  venue:"Atlanta",      a:"W86", b:"W88" },
+    { m:96, date:"Sun 5 Jul",  time:"9pm",  venue:"Vancouver",    a:"W85", b:"W87" },
+  ],
+  QF: [
+    { m:97,  date:"Thu 9 Jul",  time:"9pm", venue:"Boston",      a:"W89", b:"W90" },
+    { m:98,  date:"Fri 10 Jul", time:"8pm", venue:"Los Angeles", a:"W93", b:"W94" },
+    { m:99,  date:"Sat 11 Jul", time:"10pm",venue:"Miami",       a:"W91", b:"W92" },
+    { m:100, date:"Sun 12 Jul", time:"2am", venue:"Kansas City", a:"W95", b:"W96" },
+  ],
+  SF: [
+    { m:101, date:"Tue 14 Jul", time:"8pm", venue:"Dallas",   a:"W97", b:"W98" },
+    { m:102, date:"Wed 15 Jul", time:"8pm", venue:"Atlanta",  a:"W99", b:"W100" },
+  ],
+  Final: [
+    { m:104, date:"Sun 19 Jul", time:"8pm", venue:"New Jersey", a:"W101", b:"W102" },
+  ],
+};
+
+const KO_RESULTS = {
+  // No knockout games played yet — fill in as results come in.
+};
 
 function rankTeams(a, b) {
   return b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf;
@@ -194,6 +226,37 @@ function resolveSlot(code) {
   if (!g || !g.teams.every(t => t.gp >= 3)) return { team: null, label };
   const sorted = [...g.teams].sort(rankTeams);
   return { team: (pos === "1" ? sorted[0] : sorted[1]).name, label };
+}
+
+// Find a knockout match object by its number, across all rounds.
+function koMatch(num) {
+  for (const round of Object.values(KO)) {
+    const f = round.find(x => x.m === num);
+    if (f) return f;
+  }
+  return null;
+}
+
+// The winning team of a knockout match, if it's been played (else null).
+function koWinner(num) {
+  const res = KO_RESULTS[num];
+  const match = koMatch(num);
+  if (!res || !match) return null;
+  const a = resolveTeam(match.a).team, b = resolveTeam(match.b).team;
+  if (!a || !b) return null;
+  if (res.as > res.bs) return a;
+  if (res.bs > res.as) return b;
+  return res.pens === "a" ? a : res.pens === "b" ? b : null;
+}
+
+// Resolve any bracket slot — group codes, assigned thirds, or "W##" winner references.
+function resolveTeam(slot) {
+  if (typeof slot === "string" && slot[0] === "W" && /^\d+$/.test(slot.slice(1))) {
+    const num = parseInt(slot.slice(1), 10);
+    const w = koWinner(num);
+    return w ? { team: w, label: w } : { team: null, label: "Winner " + num };
+  }
+  return resolveSlot(slot);
 }
 
 
@@ -367,60 +430,93 @@ function WinIndexTab() {
   );
 }
 
-function BracketTab() {
-  const Slot = ({ code }) => {
-    const { team, label } = resolveSlot(code);
-    if (!team) {
-      return (
-        <div style={{ display: "flex", alignItems: "center", height: 30, padding: "0 4px" }}>
-          <span style={{ color: "#5C6B82", fontSize: 12.5, fontStyle: "italic" }}>{label}</span>
-        </div>
-      );
-    }
-    const owner = ownerOf(team);
-    const col = (owner && PLAYER_COLORS[owner]) || "#5C6B82";
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 30, padding: "0 4px" }}>
-        <span style={{ color: "#fff", fontSize: 13.5, fontWeight: 700 }}>{team}</span>
-        {owner && (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: col, boxShadow: `0 0 6px ${col}` }} />
-            <span style={{ color: col, fontSize: 10.5, fontWeight: 700 }}>{owner}</span>
-          </span>
-        )}
-      </div>
-    );
-  };
-
-  let lastDate = null;
+// One team line inside a bracket card.
+function BracketSlot({ slot, matchNum, side, top }) {
+  const { team, label } = resolveTeam(slot);
+  const res = KO_RESULTS[matchNum];
+  const owner = team ? ownerOf(team) : null;
+  const col = (owner && PLAYER_COLORS[owner]) || "#46566F";
+  const score = res ? (side === "a" ? res.as : res.bs) : null;
+  const winner = res ? koWinner(matchNum) : null;
+  const isWinner = winner && team === winner;
+  const isLoser = res && team && !isWinner;
   return (
-    <div style={{ marginBottom: 16 }}>
-      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>
-        Round of 32. Finished groups fill in automatically; the rest show their slot (Winner G, Runner-up H…) until the games are played. Third-place slots lock once the best-8 thirds are known after the group stage.
-      </p>
-      {R32.map(match => {
-        const showDate = match.date !== lastDate;
-        lastDate = match.date;
-        return (
-          <div key={match.m}>
-            {showDate && (
-              <p style={{ color: GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", margin: "14px 0 8px" }}>{match.date}</p>
-            )}
-            <div style={{ background: NAVY2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "8px 12px", marginBottom: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                <span style={{ color: "#3D4A5E", fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Match {match.m}</span>
-                <span style={{ color: "#3D4A5E", fontSize: 9.5 }}>{match.venue}</span>
-              </div>
-              <Slot code={match.a} />
-              <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "1px 0" }} />
-              <Slot code={match.b} />
-            </div>
-          </div>
-        );
-      })}
+    <div style={{
+      display: "flex", alignItems: "center", gap: 6, height: 26, padding: "0 8px",
+      borderBottom: top ? "1px solid rgba(255,255,255,0.05)" : "none",
+      borderLeft: `3px solid ${team ? col : "transparent"}`,
+      opacity: isLoser ? 0.4 : 1,
+    }}>
+      <span style={{
+        flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        color: team ? "#fff" : "#5C6B82", fontSize: 12, fontWeight: isWinner ? 800 : team ? 600 : 400,
+        fontStyle: team ? "normal" : "italic",
+      }}>{team || label}</span>
+      {owner && <span style={{ width: 6, height: 6, borderRadius: "50%", background: col, flexShrink: 0, boxShadow: `0 0 5px ${col}` }} />}
+      {score != null && <span style={{ color: isWinner ? GOLD : INK_SUB, fontSize: 12, fontWeight: 800, minWidth: 10, textAlign: "right" }}>{score}</span>}
     </div>
   );
 }
+
+function BracketCard({ match, accent }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <span style={{ color: "#3D4A5E", fontSize: 8.5, fontWeight: 700, letterSpacing: 0.5, marginBottom: 2 }}>
+        {match.date} · {match.time}
+      </span>
+      <div style={{
+        width: "100%", background: NAVY2, borderRadius: 9, overflow: "hidden",
+        border: `1px solid ${accent ? GOLD + "66" : "rgba(255,255,255,0.09)"}`,
+        boxShadow: accent ? `0 0 16px ${GOLD}33` : "0 2px 8px rgba(0,0,0,0.25)",
+      }}>
+        <BracketSlot slot={match.a} matchNum={match.m} side="a" top />
+        <BracketSlot slot={match.b} matchNum={match.m} side="b" />
+      </div>
+    </div>
+  );
+}
+
+function BracketTab() {
+  const rounds = [
+    { key: "R32",   label: "Round of 32",   matches: KO.R32 },
+    { key: "R16",   label: "Round of 16",   matches: KO.R16 },
+    { key: "QF",    label: "Quarter-finals",matches: KO.QF },
+    { key: "SF",    label: "Semi-finals",   matches: KO.SF },
+    { key: "Final", label: "Final",         matches: KO.Final },
+  ];
+  const COL_H = KO.R32.length * 70; // total tree height; later rounds centre within it
+  const COL_W = { R32: 168, R16: 158, QF: 158, SF: 158, Final: 170 };
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 4px", lineHeight: 1.6 }}>
+        The road to the final. Swipe sideways to follow each path; every team carries its owner's colour. Scores and winners fill in as the knockouts are played.
+      </p>
+      <p style={{ color: "#3D4A5E", fontSize: 10.5, margin: "0 0 12px" }}>← swipe to see later rounds →</p>
+      <div style={{ overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch", paddingBottom: 10 }}>
+        <div style={{ display: "flex", gap: 16, height: COL_H, minWidth: "max-content" }}>
+          {rounds.map(r => (
+            <div key={r.key} style={{ display: "flex", flexDirection: "column", width: COL_W[r.key], flexShrink: 0 }}>
+              <div style={{
+                textAlign: "center", marginBottom: 6, padding: "5px 0", borderRadius: 7,
+                background: r.key === "Final" ? `linear-gradient(90deg, ${GOLD}22, ${GOLD}11)` : "rgba(64,198,160,0.08)",
+                color: r.key === "Final" ? GOLD : GREEN, fontSize: 10.5, fontWeight: 800,
+                letterSpacing: 1, textTransform: "uppercase",
+                border: `1px solid ${r.key === "Final" ? GOLD + "44" : "rgba(64,198,160,0.18)"}`,
+              }}>{r.key === "Final" ? "🏆 Final" : r.label}</div>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-around" }}>
+                {r.matches.map(match => (
+                  <BracketCard key={match.m} match={match} accent={r.key === "Final"} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 function TopTeams() {
   const all = GROUPS.flatMap(g => {
@@ -627,7 +723,7 @@ function SquadsTab() {
 }
 
 export default function SweepstakeDashboard() {
-  const [view, setView] = useState("standings");
+  const [view, setView] = useState("knockouts");
   const ranked = [...PLAYERS].sort((a, b) => b.total - a.total);
   const leader = ranked[0];
   const integrityIssues = dataIntegrityIssues();
@@ -635,13 +731,13 @@ export default function SweepstakeDashboard() {
   const ptsLeftFor = (name) => Object.keys(OWNERS).filter(t => OWNERS[t] === name).reduce((s, t) => s + (remaining[t] || 0), 0) * 3;
 
   const tabs = [
+    { id: "knockouts",   label: "Knockouts" },
     { id: "standings",   label: "Standings" },
     { id: "winindex",    label: "Win %" },
-    { id: "knockouts",   label: "Knockouts" },
-    { id: "progression", label: "Progress" },
-    { id: "squads",      label: "Squads" },
-    { id: "groups",      label: "Groups" },
     { id: "fixtures",    label: "Fixtures" },
+    { id: "squads",      label: "Squads" },
+    { id: "progression", label: "Progress" },
+    { id: "groups",      label: "Groups" },
     { id: "topteams",    label: "Top Teams" },
   ];
 
