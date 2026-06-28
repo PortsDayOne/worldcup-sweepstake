@@ -464,6 +464,7 @@ function BracketSlot({ slot, matchNum, side, top }) {
       background: isWinner ? `${col}1c` : "transparent",
       opacity: isLoser ? 0.38 : 1,
     }}>
+      {team && <span style={{ fontSize: 12, flexShrink: 0, filter: isLoser ? "grayscale(1)" : "none" }}>{flagFor(team)}</span>}
       <span style={{
         flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         color: team ? "#fff" : "#566679", fontSize: 11.5, fontWeight: isWinner ? 900 : team ? 600 : 400,
@@ -648,11 +649,13 @@ function FixturesTab() {
                 </div>
                 <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 14 }}>{flagFor(g.home)}</span>
                     <span style={{ color: homeOwner ? "#fff" : INK_SUB, fontSize: 13, fontWeight: homeOwner ? 700 : 400 }}>{g.home}</span>
                     {homeOwner && <OwnerBadge team={g.home} />}
                   </div>
                   <span style={{ color: INK_SUB, fontSize: 11 }}>vs</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 14 }}>{flagFor(g.away)}</span>
                     <span style={{ color: awayOwner ? "#fff" : INK_SUB, fontSize: 13, fontWeight: awayOwner ? 700 : 400 }}>{g.away}</span>
                     {awayOwner && <OwnerBadge team={g.away} />}
                   </div>
@@ -677,6 +680,18 @@ const SQUAD_DATA = [
   { name: "Matt",    teams: [{ f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", n:"Scotland", p:3 },{ f:"🇦🇹", n:"Austria", p:4 },{ f:"🇪🇬", n:"Egypt", p:5 },{ f:"🇸🇳", n:"Senegal", p:3 },{ f:"🇮🇶", n:"Iraq", p:0 },{ f:"🇩🇿", n:"Algeria", p:4 }] },
   { name: "Karina",  teams: [{ f:"🇳🇿", n:"New Zealand", p:1 },{ f:"🇨🇻", n:"Cape Verde", p:3 },{ f:"🇶🇦", n:"Qatar", p:1 },{ f:"🇹🇷", n:"Türkiye", p:3 },{ f:"🇯🇴", n:"Jordan", p:0 },{ f:"🇭🇷", n:"Croatia", p:6 }] },
 ];
+
+// Flag lookup for every team, keyed by squad name, with the few groups.js spellings bridged.
+const FLAGS = {};
+SQUAD_DATA.forEach(s => s.teams.forEach(t => { FLAGS[t.n] = t.f; }));
+function flagFor(name) {
+  if (FLAGS[name]) return FLAGS[name];
+  const cand = TEAM_ALIASES[name] || name;
+  if (FLAGS[cand]) return FLAGS[cand];
+  const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  for (const k in FLAGS) if (norm(k) === norm(name) || norm(k) === norm(cand)) return FLAGS[k];
+  return "🏳️";
+}
 
 function FlipCard({ player }) {
   const [flipped, setFlipped] = useState(false);
@@ -805,10 +820,15 @@ function GlobalFX() {
 
 // Full-screen 5-second trophy lift on load — confetti, rings, bursting balls.
 function TrophyIntro({ onDone }) {
-  useEffect(() => {
-    const t = setTimeout(onDone, 5000);
-    return () => clearTimeout(t);
-  }, [onDone]);
+  const [started, setStarted] = useState(false);
+  const [fading, setFading] = useState(false);
+  const start = () => {
+    if (started) return;
+    setStarted(true);
+    playFanfare();                 // fired directly inside the tap — most reliable for mobile
+    setTimeout(() => setFading(true), 4100);
+    setTimeout(onDone, 4700);
+  };
   const confetti = Array.from({ length: 28 }, (_, i) => ({
     left: (i * 3.6 + (i % 4) * 2) % 100,
     c: [GREEN, GOLD, MAGENTA, CYAN, VIOLET, "#fff"][i % 6],
@@ -816,35 +836,41 @@ function TrophyIntro({ onDone }) {
   }));
   const rays = Array.from({ length: 10 }, (_, i) => i * 36);
   return (
-    <div onClick={onDone} style={{
+    <div onPointerDown={start} style={{
       position: "fixed", inset: 0, zIndex: 9999, cursor: "pointer", overflow: "hidden",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       background: "radial-gradient(circle at 50% 44%, #0c1d38, #03060d 76%)",
-      animation: "wcIntroFade 5s ease forwards",
+      opacity: fading ? 0 : 1, transition: "opacity 0.6s ease",
     }}>
-      {confetti.map((c, i) => (
+      {started && confetti.map((c, i) => (
         <span key={i} style={{ position: "absolute", top: "-24px", left: `${c.left}%`, width: c.w, height: c.w * 0.5, background: c.c, borderRadius: 1, boxShadow: `0 0 6px ${c.c}`, animation: `wcConfetti ${c.dur}s linear ${c.delay}s infinite` }} />
       ))}
-      {[0, 1, 2].map(i => (
+      {started && [0, 1, 2].map(i => (
         <span key={i} style={{ position: "absolute", width: 150, height: 150, borderRadius: "50%", border: `2px solid ${GOLD}`, animation: `wcRing 2.4s ease-out ${i * 0.7}s infinite` }} />
       ))}
-      {rays.map((deg, i) => (
+      {started && rays.map((deg, i) => (
         <span key={i} style={{ position: "absolute", transform: `rotate(${deg}deg)` }}>
           <span style={{ display: "inline-block", fontSize: 18, animation: `wcBurst 1.7s ease-out ${0.35 + i * 0.04}s both` }}>⚽</span>
         </span>
       ))}
-      <div style={{ animation: "wcSlowZoom 5s ease-out both", position: "relative", zIndex: 2 }}>
+      <div style={{ animation: started ? "wcSlowZoom 4.7s ease-out both" : "none", position: "relative", zIndex: 2 }}>
         <div style={{ animation: "wcBob 2.6s ease-in-out infinite" }}>
-          <div style={{ fontSize: 112, lineHeight: 1, animation: "wcTrophyIn 1s cubic-bezier(.2,1.1,.3,1) both", filter: `drop-shadow(0 0 34px ${GOLD})` }}>🏆</div>
+          <div style={{ fontSize: 112, lineHeight: 1, filter: `drop-shadow(0 0 34px ${GOLD})` }}>🏆</div>
         </div>
       </div>
-      <div style={{ marginTop: 14, position: "relative", zIndex: 2, animation: "wcFade 0.8s ease 0.5s both", textAlign: "center" }}>
+      <div style={{ marginTop: 14, position: "relative", zIndex: 2, textAlign: "center" }}>
         <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: 4, textTransform: "uppercase", color: GREEN, textShadow: `0 0 12px ${GREEN}` }}>FIFA World Cup 2026</p>
         <p style={{ margin: "5px 0 0", fontSize: 32, fontWeight: 900, letterSpacing: -0.5,
           background: `linear-gradient(100deg, ${GOLD} 18%, #fff 50%, ${GOLD} 82%)`, backgroundSize: "200% 100%",
           WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", animation: "wcShine 2.4s linear infinite" }}>Sweepstake</p>
       </div>
-      <p style={{ position: "absolute", bottom: 38, color: INK_SUB, fontSize: 11, letterSpacing: 1, zIndex: 2, opacity: 0.7 }}>tap to skip</p>
+      {!started && (
+        <div style={{ position: "absolute", bottom: 70, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, animation: "wcPulse 1.4s ease-in-out infinite" }}>
+          <span style={{ fontSize: 30 }}>▶️</span>
+          <span style={{ color: "#fff", fontSize: 15, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", textShadow: `0 0 14px ${GREEN}` }}>Tap to kick off</span>
+          <span style={{ color: INK_SUB, fontSize: 10.5 }}>(turn your ringer up for sound)</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -1061,15 +1087,6 @@ function FieldTab() {
 export default function SweepstakeDashboard() {
   const [view, setView] = useState("knockouts");
   const [intro, setIntro] = useState(true);
-  // Epic fanfare on the first tap (browsers block audio before a gesture, so it
-  // fires the moment the page is touched — e.g. tapping to skip the intro).
-  useEffect(() => {
-    let played = false;
-    const go = () => { if (played) return; played = true; playFanfare(); window.removeEventListener("pointerdown", go); };
-    window.addEventListener("pointerdown", go);
-    return () => window.removeEventListener("pointerdown", go);
-  }, []);
-
   const tabs = [
     { id: "knockouts", label: "Knockouts" },
     { id: "players",   label: "The Field" },
