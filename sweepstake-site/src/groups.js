@@ -106,22 +106,22 @@ export const GROUPS = [
     { name: "Iraq", gp:3, w:0, d:0, l:3, gf:1, ga:12, pts:0 }
   ]},
   { name: "Group J", teams: [
-    { name: "Argentina", gp:2, w:2, d:0, l:0, gf:5, ga:0, pts:6 },
-    { name: "Austria", gp:2, w:1, d:0, l:1, gf:3, ga:3, pts:3 },
-    { name: "Algeria", gp:2, w:1, d:0, l:1, gf:2, ga:4, pts:3 },
-    { name: "Jordan", gp:2, w:0, d:0, l:2, gf:2, ga:5, pts:0 }
+    { name: "Argentina", gp:3, w:3, d:0, l:0, gf:8, ga:1, pts:9 },
+    { name: "Austria", gp:3, w:1, d:1, l:1, gf:6, ga:6, pts:4 },
+    { name: "Algeria", gp:3, w:1, d:1, l:1, gf:5, ga:7, pts:4 },
+    { name: "Jordan", gp:3, w:0, d:0, l:3, gf:3, ga:8, pts:0 }
   ]},
   { name: "Group K", teams: [
-    { name: "Colombia", gp:2, w:2, d:0, l:0, gf:4, ga:1, pts:6 },
-    { name: "Portugal", gp:2, w:1, d:1, l:0, gf:6, ga:1, pts:4 },
-    { name: "Congo DR", gp:2, w:0, d:1, l:1, gf:1, ga:2, pts:1 },
-    { name: "Uzbekistan", gp:2, w:0, d:0, l:2, gf:1, ga:8, pts:0 }
+    { name: "Colombia", gp:3, w:2, d:1, l:0, gf:4, ga:1, pts:7 },
+    { name: "Portugal", gp:3, w:1, d:2, l:0, gf:6, ga:1, pts:5 },
+    { name: "Congo DR", gp:3, w:1, d:1, l:1, gf:4, ga:3, pts:4 },
+    { name: "Uzbekistan", gp:3, w:0, d:0, l:3, gf:2, ga:11, pts:0 }
   ]},
   { name: "Group L", teams: [
-    { name: "England", gp:2, w:1, d:1, l:0, gf:4, ga:2, pts:4 },
-    { name: "Ghana", gp:2, w:1, d:1, l:0, gf:1, ga:0, pts:4 },
-    { name: "Croatia", gp:2, w:1, d:0, l:1, gf:3, ga:4, pts:3 },
-    { name: "Panama", gp:2, w:0, d:0, l:2, gf:0, ga:2, pts:0 }
+    { name: "England", gp:3, w:2, d:1, l:0, gf:6, ga:2, pts:7 },
+    { name: "Croatia", gp:3, w:2, d:0, l:1, gf:5, ga:5, pts:6 },
+    { name: "Ghana", gp:3, w:1, d:1, l:1, gf:2, ga:2, pts:4 },
+    { name: "Panama", gp:3, w:0, d:0, l:3, gf:0, ga:4, pts:0 }
   ]}
 ];
 
