@@ -836,7 +836,7 @@ function TrophyIntro({ onDone }) {
   }));
   const rays = Array.from({ length: 10 }, (_, i) => i * 36);
   return (
-    <div onPointerDown={start} style={{
+    <div onClick={start} style={{
       position: "fixed", inset: 0, zIndex: 9999, cursor: "pointer", overflow: "hidden",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       background: "radial-gradient(circle at 50% 44%, #0c1d38, #03060d 76%)",
