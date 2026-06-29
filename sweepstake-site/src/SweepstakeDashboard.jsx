@@ -214,6 +214,7 @@ const KO = {
 
 const KO_RESULTS = {
   73: { as: 0, bs: 1 }, // South Africa 0–1 Canada (R32) — Eustáquio 90+2'
+  76: { as: 2, bs: 1 }, // Brazil 2–1 Japan (R32) — Martinelli late winner
 };
 
 function rankTeams(a, b) {
@@ -493,7 +494,7 @@ function BracketCard({ match, accent }) {
   );
 }
 
-function BracketTab() {
+function TreeBracket() {
   const rounds = [
     { key: "R32",   label: "Round of 32",    matches: KO.R32 },
     { key: "R16",   label: "Round of 16",    matches: KO.R16 },
@@ -554,7 +555,126 @@ function BracketTab() {
   );
 }
 
+// Radial "circle draw" — all 32 teams ringed around the trophy, lines converging inward.
+function CircleBracket() {
+  const C = 500, VB = 1000;
+  const R = [442, 350, 264, 184, 110];       // ring radii, outer→in
+  const NR = [42, 35, 31, 27, 25];           // node radii per ring
+  const koOut = koLosers();
+  const isOut = name => name && (ELIMINATED.has(name) || koOut.has(name));
 
+  // Outer 32 teams in true bracket order (pairs adjacent).
+  const outer = [];
+  KO.R32.forEach(m => { outer.push(resolveTeam(m.a).team); outer.push(resolveTeam(m.b).team); });
+  const ang0 = outer.map((_, p) => -90 + p * (360 / 32));
+  const avg = (arr, n) => Array.from({ length: n }, (_, i) => (arr[2 * i] + arr[2 * i + 1]) / 2);
+  const ang1 = avg(ang0, 16), ang2 = avg(ang1, 8), ang3 = avg(ang2, 4), ang4 = avg(ang3, 2);
+  const pos = (rad, deg) => { const a = deg * Math.PI / 180; return [C + rad * Math.cos(a), C + rad * Math.sin(a)]; };
+
+  // Winners per inner ring (by match number, in bracket order).
+  const w1 = KO.R32.map(m => koWinner(m.m));
+  const w2 = KO.R16.map(m => koWinner(m.m));
+  const w3 = KO.QF.map(m => koWinner(m.m));
+  const w4 = KO.SF.map(m => koWinner(m.m));
+  const champ = koWinner(KO.Final[0].m);
+
+  const rings = [
+    { teams: outer, ang: ang0, r: R[0], nr: NR[0] },
+    { teams: w1, ang: ang1, r: R[1], nr: NR[1] },
+    { teams: w2, ang: ang2, r: R[2], nr: NR[2] },
+    { teams: w3, ang: ang3, r: R[3], nr: NR[3] },
+    { teams: w4, ang: ang4, r: R[4], nr: NR[4] },
+  ];
+
+  // Connector lines: each node to its parent (next ring in).
+  const lines = [];
+  for (let lvl = 0; lvl < 4; lvl++) {
+    const child = rings[lvl], parent = rings[lvl + 1];
+    child.teams.forEach((t, i) => {
+      const [cx, cy] = pos(child.r, child.ang[i]);
+      const [px, py] = pos(parent.r, parent.ang[i >> 1]);
+      const advanced = t && parent.teams[i >> 1] === t;
+      lines.push({ cx, cy, px, py, advanced });
+    });
+  }
+  // SF → centre
+  rings[4].teams.forEach((t, i) => {
+    const [cx, cy] = pos(R[4], ang4[i]);
+    lines.push({ cx, cy, px: C, py: C, advanced: t && champ === t });
+  });
+
+  const node = (team, x, y, r, key) => {
+    const owner = team ? ownerOf(team) : null;
+    const col = owner ? PLAYER_COLORS[owner] : "#33475f";
+    const out = isOut(team);
+    return (
+      <foreignObject key={key} x={x - r} y={y - r} width={2 * r} height={2 * r} style={{ overflow: "visible" }}>
+        <div xmlns="http://www.w3.org/1999/xhtml" style={{
+          width: "100%", height: "100%", borderRadius: "50%", boxSizing: "border-box",
+          border: `3px solid ${col}`, boxShadow: out ? "none" : `0 0 9px ${col}`,
+          display: "flex", alignItems: "center", justifyContent: "center", background: "#0a1424",
+          fontSize: r * 1.15, lineHeight: 1, filter: out ? "grayscale(1)" : "none", opacity: out ? 0.4 : 1,
+        }}>{team ? flagFor(team) : ""}</div>
+      </foreignObject>
+    );
+  };
+
+  return (
+    <svg viewBox={`0 0 ${VB} ${VB}`} width="100%" style={{ display: "block" }}>
+      <defs>
+        <radialGradient id="cbGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={GOLD} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={GOLD} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx={C} cy={C} r={300} fill="url(#cbGlow)" />
+      {lines.map((l, i) => (
+        <line key={i} x1={l.cx} y1={l.cy} x2={l.px} y2={l.py}
+          stroke={l.advanced ? GOLD : GREEN} strokeWidth={l.advanced ? 3 : 1.4}
+          strokeOpacity={l.advanced ? 0.95 : 0.3} strokeLinecap="round" />
+      ))}
+      {rings.flatMap((ring, lvl) => ring.teams.map((t, i) => {
+        const [x, y] = pos(ring.r, ring.ang[i]);
+        return node(t, x, y, ring.nr, `${lvl}-${i}`);
+      }))}
+      {/* centre: champion flag if decided, else trophy */}
+      {champ ? node(champ, C, C, 34, "champ") : (
+        <text x={C} y={C} textAnchor="middle" dominantBaseline="central" fontSize="64" style={{ filter: `drop-shadow(0 0 14px ${GOLD})` }}>🏆</text>
+      )}
+    </svg>
+  );
+}
+
+function BracketTab() {
+  const [mode, setMode] = useState("circle");
+  const Toggle = ({ id, label }) => {
+    const active = mode === id;
+    return (
+      <button onClick={() => setMode(id)} style={{
+        flex: 1, padding: "9px 8px", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 800, letterSpacing: 0.5,
+        background: active ? `linear-gradient(135deg, ${GREEN}, ${CYAN})` : "rgba(255,255,255,0.05)",
+        color: active ? NAVY : INK_SUB, border: `1px solid ${active ? GREEN : "rgba(255,255,255,0.08)"}`,
+        boxShadow: active ? `0 0 16px ${GREEN}55` : "none",
+      }}>{label}</button>
+    );
+  };
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <Toggle id="circle" label="◎ Circle" />
+        <Toggle id="tree" label="⊟ Tree" />
+      </div>
+      {mode === "circle" ? (
+        <>
+          <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>
+            All 32, ringed around the trophy. Each flag carries its owner's colour; knocked-out teams grey out and winning paths light up gold as they advance toward the centre.
+          </p>
+          <CircleBracket />
+        </>
+      ) : <TreeBracket />}
+    </div>
+  );
+}
 
 function TopTeams() {
   const all = GROUPS.flatMap(g => {
@@ -1011,10 +1131,10 @@ function teamAlive(shortName) {
 // One-line status per player — rewrite each update with what's just happened.
 const BLURBS = {
   Lottie:  "All six teams still standing — no one has more of the board left.",
-  Tom:     "Five still alive and firing, Brazil heading the charge.",
+  Tom:     "Brazil came from behind to beat Japan and reach the last 16 — five still alive.",
   Sam:     "France and Spain alive make him the bookies' title favourite.",
   Joanne:  "Canada edged South Africa in the all-Joanne tie — into the last 16, but down to three.",
-  Joe:     "Three sneaked into the knockouts after DR Congo's late escape.",
+  Joe:     "Japan fell to Brazil — down to just Belgium and DR Congo now.",
   Darrell: "Four survivors led by Switzerland and Portugal.",
   Matt:    "Four teams still alive after a strong finish to the groups.",
   Karina:  "Down to two, but Croatia and Cape Verde keep her swinging.",
