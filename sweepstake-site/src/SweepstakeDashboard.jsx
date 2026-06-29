@@ -645,6 +645,47 @@ function CircleBracket() {
   );
 }
 
+function CompactField() {
+  const winIdx = computeWinIndex();
+  const maxPct = Math.max(...winIdx.map(r => r.pct)) || 1;
+  const medal = ["#FFD23F", "#C8D2E0", "#E08A4B"];
+  return (
+    <div style={{ marginTop: 20 }}>
+      <p style={{ color: GREEN, fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 4px", textShadow: `0 0 10px ${GREEN}` }}>The Field</p>
+      <p style={{ color: INK_SUB, fontSize: 10.5, margin: "0 0 10px" }}>Ranked by Win % · flags grey out as teams go out</p>
+      {winIdx.map((r, i) => {
+        const p = PLAYERS.find(x => x.name === r.name);
+        const squad = SQUAD_DATA.find(s => s.name === r.name);
+        const teams = squad ? squad.teams : [];
+        const aliveN = teams.filter(t => teamAlive(t.n)).length;
+        return (
+          <div key={r.name} style={{
+            background: `linear-gradient(135deg, ${p.color}16, ${NAVY2} 62%)`,
+            border: `1px solid ${p.color}33`, borderLeft: `3px solid ${p.color}`, borderRadius: 11,
+            padding: "8px 11px", marginBottom: 7, animation: "wcFade 0.35s ease both",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ width: 19, height: 19, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: medal[i] || "rgba(255,255,255,0.08)", color: medal[i] ? NAVY : INK_SUB, fontWeight: 900, fontSize: 10.5, boxShadow: medal[i] ? `0 0 8px ${medal[i]}88` : "none" }}>{i + 1}</span>
+              <span style={{ color: p.color, fontSize: 13.5, fontWeight: 900, flex: 1, textShadow: `0 0 7px ${p.color}88`, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</span>
+              <span style={{ display: "flex", gap: 3, alignItems: "center", marginRight: 4 }}>
+                {teams.map(t => {
+                  const live = teamAlive(t.n);
+                  return <span key={t.n} style={{ fontSize: 13, filter: live ? "none" : "grayscale(1)", opacity: live ? 1 : 0.35 }}>{t.f}</span>;
+                })}
+              </span>
+              <span style={{ color: "#fff", fontSize: 11.5, fontWeight: 800, minWidth: 26, textAlign: "right" }}>{aliveN}<span style={{ color: INK_SUB, fontSize: 9.5, fontWeight: 600 }}>/6</span></span>
+              <span style={{ color: GOLD, fontSize: 12.5, fontWeight: 900, minWidth: 44, textAlign: "right", textShadow: `0 0 7px ${GOLD}66` }}>{r.pct.toFixed(1)}%</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 3, background: "rgba(255,255,255,0.06)", overflow: "hidden", marginTop: 6 }}>
+              <div style={{ width: `${(r.pct / maxPct) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${p.color}, ${GOLD})`, boxShadow: `0 0 8px ${p.color}88` }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function BracketTab() {
   const [mode, setMode] = useState("circle");
   const Toggle = ({ id, label }) => {
@@ -672,6 +713,7 @@ function BracketTab() {
           <CircleBracket />
         </>
       ) : <TreeBracket />}
+      <CompactField />
     </div>
   );
 }
@@ -1209,7 +1251,6 @@ export default function SweepstakeDashboard() {
   const [intro, setIntro] = useState(true);
   const tabs = [
     { id: "knockouts", label: "Knockouts" },
-    { id: "players",   label: "The Field" },
     { id: "fixtures",  label: "Fixtures" },
   ];
 
@@ -1265,20 +1306,8 @@ export default function SweepstakeDashboard() {
         {/* Tab content with fade animation */}
         <TabPanel key={view}>
           {view === "knockouts" && <BracketTab />}
-          {view === "players" && <FieldTab />}
           {view === "fixtures" && <FixturesTab />}
         </TabPanel>
-
-        {/* Scoring key */}
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: 8 }}>
-          {[["WIN", 3, GREEN], ["DRAW", 1, "#5896FF"], ["LOSS", 0, INK_SUB]].map(([l, n, c]) => (
-            <div key={l} style={{ display: "flex", alignItems: "center", gap: 6, border: `1.5px solid ${c}`, borderRadius: 20, padding: "5px 14px", boxShadow: `0 0 8px ${c}33` }}>
-              <span style={{ color: "#D2DAE6", fontSize: 11, fontWeight: 600, letterSpacing: 1 }}>{l}</span>
-              <span style={{ width: 18, height: 18, borderRadius: "50%", background: c, color: NAVY, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 8px ${c}88` }}>{n}</span>
-            </div>
-          ))}
-        </div>
-        <p style={{ color: "#3D4A5E", fontSize: 10, textAlign: "center", marginTop: 16 }}>World Cup 2026 Sweepstake · Win 3 · Draw 1 · Loss 0</p>
       </div>
     </div>
   );
