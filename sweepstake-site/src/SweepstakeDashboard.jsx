@@ -215,6 +215,8 @@ const KO = {
 const KO_RESULTS = {
   73: { as: 0, bs: 1 }, // South Africa 0–1 Canada (R32) — Eustáquio 90+2'
   76: { as: 2, bs: 1 }, // Brazil 2–1 Japan (R32) — Martinelli late winner
+  74: { as: 1, bs: 1, pens: "b" }, // Germany 1–1 Paraguay (R32) — Paraguay win 4–3 pens
+  75: { as: 1, bs: 1, pens: "b" }, // Netherlands 1–1 Morocco (R32) — Morocco win 3–2 pens
 };
 
 function rankTeams(a, b) {
@@ -1172,10 +1174,10 @@ function teamAlive(shortName) {
 
 // One-line status per player — rewrite each update with what's just happened.
 const BLURBS = {
-  Lottie:  "All six teams still standing — no one has more of the board left.",
+  Lottie:  "Morocco and Paraguay both advance — Netherlands fell in her own all-Lottie tie. Five still in.",
   Tom:     "Brazil came from behind to beat Japan and reach the last 16 — five still alive.",
   Sam:     "France and Spain alive make him the bookies' title favourite.",
-  Joanne:  "Canada edged South Africa in the all-Joanne tie — into the last 16, but down to three.",
+  Joanne:  "Germany's shock penalty exit to Paraguay leaves her down to Colombia and Canada.",
   Joe:     "Japan fell to Brazil — down to just Belgium and DR Congo now.",
   Darrell: "Four survivors led by Switzerland and Portugal.",
   Matt:    "Four teams still alive after a strong finish to the groups.",
