@@ -217,6 +217,9 @@ const KO_RESULTS = {
   76: { as: 2, bs: 1 }, // Brazil 2–1 Japan (R32) — Martinelli late winner
   74: { as: 1, bs: 1, pens: "b" }, // Germany 1–1 Paraguay (R32) — Paraguay win 4–3 pens
   75: { as: 1, bs: 1, pens: "b" }, // Netherlands 1–1 Morocco (R32) — Morocco win 3–2 pens
+  77: { as: 3, bs: 0 }, // France 3–0 Sweden (R32) — Mbappé brace (all-Sam tie)
+  78: { as: 1, bs: 2 }, // Ivory Coast 1–2 Norway (R32) — Haaland winner
+  79: { as: 2, bs: 0 }, // Mexico 2–0 Ecuador (R32)
 };
 
 function rankTeams(a, b) {
@@ -794,41 +797,74 @@ function TopTeams() {
 }
 
 function FixturesTab() {
-  const byDate = FIXTURES.reduce((acc, f) => { if (!acc[f.date]) acc[f.date] = []; acc[f.date].push(f); return acc; }, {});
+  const MONTHS = { Jun: 6, Jul: 7 };
+  const dateKey = m => {
+    const p = m.date.split(" "); const day = +p[1], mon = MONTHS[p[2]] || 7;
+    const tm = (m.time || "").match(/(\d+)(?::(\d+))?(am|pm)/i);
+    let hr = tm ? +tm[1] : 0; const min = tm && tm[2] ? +tm[2] : 0; const pm = tm && /pm/i.test(tm[3]);
+    if (pm && hr !== 12) hr += 12; if (!pm && hr === 12) hr = 0;
+    return (mon * 100 + day) * 10000 + hr * 100 + min;
+  };
+  const rounds = [
+    { key: "R32", label: "Round of 32", matches: KO.R32 },
+    { key: "R16", label: "Round of 16", matches: KO.R16 },
+    { key: "QF", label: "Quarter-finals", matches: KO.QF },
+    { key: "SF", label: "Semi-finals", matches: KO.SF },
+    { key: "Final", label: "Final", matches: KO.Final },
+  ];
+  const Side = ({ slot, matchNum, side }) => {
+    const { team, label } = resolveTeam(slot);
+    const res = KO_RESULTS[matchNum];
+    const owner = team ? ownerOf(team) : null;
+    const col = owner ? PLAYER_COLORS[owner] : null;
+    const win = res ? koWinner(matchNum) : null;
+    const isWin = win && team === win, isLoss = res && team && !isWin;
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 5, flex: 1, justifyContent: side === "a" ? "flex-end" : "flex-start", opacity: isLoss ? 0.45 : 1, minWidth: 0 }}>
+        {side === "b" && team && <span style={{ fontSize: 15 }}>{flagFor(team)}</span>}
+        <span style={{ color: team ? "#fff" : "#5C6B82", fontSize: 12.5, fontWeight: isWin ? 900 : team ? 600 : 400, fontStyle: team ? "normal" : "italic", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{team || label}</span>
+        {col && <span style={{ width: 6, height: 6, borderRadius: "50%", background: col, flexShrink: 0, boxShadow: `0 0 5px ${col}` }} />}
+        {side === "a" && team && <span style={{ fontSize: 15 }}>{flagFor(team)}</span>}
+      </div>
+    );
+  };
   return (
     <div>
-      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 12px", lineHeight: 1.6 }}>All times UK (BST). Highlighted rows = your sweepstake teams playing.</p>
-      {Object.entries(byDate).map(([date, games]) => (
-        <div key={date} style={{ marginBottom: 16 }}>
-          <p style={{ color: GREEN, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px", textShadow: `0 0 8px ${GREEN}88` }}>{date}</p>
-          {games.map((g, i) => {
-            const homeOwner = ownerOf(g.home);
-            const awayOwner = ownerOf(g.away);
-            const hasOwner = homeOwner || awayOwner;
-            return (
-              <div key={i} style={{ background: hasOwner ? "rgba(64,198,160,0.07)" : NAVY2, border: `1px solid ${hasOwner ? "rgba(64,198,160,0.25)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "11px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 10, boxShadow: hasOwner ? `0 0 12px rgba(64,198,160,0.08)` : "none" }}>
-                <div style={{ flexShrink: 0, minWidth: 60 }}>
-                  <p style={{ color: GOLD, fontSize: 12, fontWeight: 700, margin: 0, textShadow: `0 0 8px ${GOLD}88` }}>{g.time}</p>
-                  <p style={{ color: INK_SUB, fontSize: 10, margin: 0 }}>{g.group.length > 2 ? g.group : "Grp " + g.group}</p>
-                </div>
-                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ fontSize: 14 }}>{flagFor(g.home)}</span>
-                    <span style={{ color: homeOwner ? "#fff" : INK_SUB, fontSize: 13, fontWeight: homeOwner ? 700 : 400 }}>{g.home}</span>
-                    {homeOwner && <OwnerBadge team={g.home} />}
+      <p style={{ color: INK_SUB, fontSize: 12, margin: "0 0 14px", lineHeight: 1.6 }}>All times UK (BST). Owner-coloured dots mark sweepstake teams; finished games show the score.</p>
+      {rounds.map(r => {
+        const ms = [...r.matches].sort((a, b) => dateKey(a) - dateKey(b));
+        return (
+          <div key={r.key} style={{ marginBottom: 18 }}>
+            <p style={{ color: r.key === "Final" ? GOLD : GREEN, fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px", textShadow: `0 0 8px ${(r.key === "Final" ? GOLD : GREEN)}88` }}>{r.key === "Final" ? "🏆 Final" : r.label}</p>
+            {ms.map(m => {
+              const res = KO_RESULTS[m.m];
+              const owned = [resolveTeam(m.a).team, resolveTeam(m.b).team].some(t => t && ownerOf(t));
+              const win = res ? koWinner(m.m) : null;
+              const winA = win && resolveTeam(m.a).team === win;
+              return (
+                <div key={m.m} style={{ background: owned ? "rgba(29,240,165,0.06)" : NAVY2, border: `1px solid ${owned ? "rgba(29,240,165,0.22)" : "rgba(255,255,255,0.06)"}`, borderRadius: 12, padding: "9px 12px", marginBottom: 7 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Side slot={m.a} matchNum={m.m} side="a" />
+                    <div style={{ flexShrink: 0, textAlign: "center", minWidth: 48 }}>
+                      {res ? (
+                        <span style={{ color: "#fff", fontSize: 14, fontWeight: 900 }}>
+                          <span style={{ color: winA ? GOLD : "#fff" }}>{res.as}</span>
+                          <span style={{ color: INK_SUB, margin: "0 3px" }}>-</span>
+                          <span style={{ color: !winA ? GOLD : "#fff" }}>{res.bs}</span>
+                        </span>
+                      ) : <span style={{ color: GOLD, fontSize: 11.5, fontWeight: 800, textShadow: `0 0 7px ${GOLD}66` }}>{m.time}</span>}
+                    </div>
+                    <Side slot={m.b} matchNum={m.m} side="b" />
                   </div>
-                  <span style={{ color: INK_SUB, fontSize: 11 }}>vs</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ fontSize: 14 }}>{flagFor(g.away)}</span>
-                    <span style={{ color: awayOwner ? "#fff" : INK_SUB, fontSize: 13, fontWeight: awayOwner ? 700 : 400 }}>{g.away}</span>
-                    {awayOwner && <OwnerBadge team={g.away} />}
-                  </div>
+                  <p style={{ color: "#3D4A5E", fontSize: 9.5, textAlign: "center", margin: "5px 0 0", letterSpacing: 0.3 }}>
+                    {res ? (res.pens ? `Full time · ${win} win on penalties` : `Full time · ${m.venue}`) : `${m.date} · ${m.venue}`}
+                  </p>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      ))}
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1174,12 +1210,12 @@ function teamAlive(shortName) {
 
 // One-line status per player — rewrite each update with what's just happened.
 const BLURBS = {
-  Lottie:  "Morocco and Paraguay both advance — Netherlands fell in her own all-Lottie tie. Five still in.",
-  Tom:     "Brazil came from behind to beat Japan and reach the last 16 — five still alive.",
-  Sam:     "France and Spain alive make him the bookies' title favourite.",
+  Lottie:  "Mexico, Morocco and Paraguay all march on — five still standing and clear at the top.",
+  Tom:     "Brazil's through, but Norway knocked out his Ivory Coast — down to four, and Brazil face Norway next.",
+  Sam:     "France crushed his own Sweden 3-0 and Norway's through too — Spain still to come. Title favourite.",
   Joanne:  "Germany's shock penalty exit to Paraguay leaves her down to Colombia and Canada.",
   Joe:     "Japan fell to Brazil — down to just Belgium and DR Congo now.",
-  Darrell: "Four survivors led by Switzerland and Portugal.",
+  Darrell: "Mexico ended Ecuador's run — down to Switzerland, Portugal and Ghana.",
   Matt:    "Four teams still alive after a strong finish to the groups.",
   Karina:  "Down to two, but Croatia and Cape Verde keep her swinging.",
 };
