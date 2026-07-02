@@ -220,6 +220,9 @@ const KO_RESULTS = {
   77: { as: 3, bs: 0 }, // France 3–0 Sweden (R32) — Mbappé brace (all-Sam tie)
   78: { as: 1, bs: 2 }, // Ivory Coast 1–2 Norway (R32) — Haaland winner
   79: { as: 2, bs: 0 }, // Mexico 2–0 Ecuador (R32)
+  80: { as: 2, bs: 1 }, // England 2–1 DR Congo (R32) — Kane brace
+  81: { as: 2, bs: 0 }, // USA 2–0 Bosnia (R32) — all-Tom tie
+  82: { as: 3, bs: 2 }, // Belgium 3–2 Senegal (R32, AET) — Tielemans 120+5' pen
 };
 
 function rankTeams(a, b) {
@@ -1210,13 +1213,13 @@ function teamAlive(shortName) {
 
 // One-line status per player — rewrite each update with what's just happened.
 const BLURBS = {
-  Lottie:  "Mexico, Morocco and Paraguay all march on — five still standing and clear at the top.",
-  Tom:     "Brazil's through, but Norway knocked out his Ivory Coast — down to four, and Brazil face Norway next.",
+  Lottie:  "Mexico, England, Morocco and Paraguay all through — and Mexico v England next is an all-Lottie R16 tie.",
+  Tom:     "USA saw off his own Bosnia; three left (USA, Brazil, Australia) with R16 ties vs Sam and Joe looming.",
   Sam:     "France crushed his own Sweden 3-0 and Norway's through too — Spain still to come. Title favourite.",
   Joanne:  "Germany's shock penalty exit to Paraguay leaves her down to Colombia and Canada.",
-  Joe:     "Japan fell to Brazil — down to just Belgium and DR Congo now.",
+  Joe:     "Down to his last man — Belgium survived, but England dumped out DR Congo. Belgium face USA next.",
   Darrell: "Mexico ended Ecuador's run — down to Switzerland, Portugal and Ghana.",
-  Matt:    "Four teams still alive after a strong finish to the groups.",
+  Matt:    "Senegal edged out by Belgium — down to Egypt, Austria and Algeria, all still to play their R32.",
   Karina:  "Down to two, but Croatia and Cape Verde keep her swinging.",
 };
 
